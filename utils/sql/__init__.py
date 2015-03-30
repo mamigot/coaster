@@ -20,10 +20,13 @@ class Restaurant(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     cuisine = Column(String, nullable=False)
-    location = Column(Integer)
+    location = Column(String(100), nullable=False)
     hours = Column(Integer)
-    global_rating = Column(Integer) # 0-100
-    pricing = Column(Integer) # 0-100?
+    menu_href = Column(String)
+
+    # pricing and global_rating are based on aggregrate from all review sites
+    pricing = Column(Integer)
+    global_rating = Column(Integer)
 
     def __repr__(self):
         return "<Restaurant(name='%s', cuisine='%s')>" % (self.name, self.cuisine)
@@ -42,5 +45,13 @@ def db_connect():
 
 
 def get_session():
+    # http://docs.sqlalchemy.org/en/rel_0_9/orm/tutorial.html#creating-a-session
+    # Ex.
+    #   session = get_session()
+    #   r = Restaurant(name="Grand Appetito", cuisine="Italian")
+    #   session.add(r)
+    #   session.commit()
+
     engine = db_connect()
-    return sessionmaker(bind=engine)
+    session = sessionmaker(bind=engine)
+    return session()
