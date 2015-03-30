@@ -13,11 +13,10 @@ class StoreRestaurantItem(object):
     def process_item(self, item, spider):
         session = get_session()
 
-        r = Restaurant()
-        r['name'] = item['name']
-        r['cuisine'] = item['cuisine']
-        r['location'] = item['location']
-        r['menu_href'] = item['menu_href']
+        r = Restaurant( name=item['name'],
+                        cuisine=item['cuisine'],
+                        location=item['location'],
+                        menu_href=item['menu_href'])
 
         session.add(r)
         # write restaurant to the database immediately
