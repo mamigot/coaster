@@ -31,8 +31,8 @@ class NYCListingSpider(CrawlSpider):
         s = Selector(response)
 
         item = RestaurantItem()
-        item['name'] = s.select('//*[@id="main-content-title"]/text()').extract()
-        item['cuisine'] = s.select('//*[@id="content"]/div[2]/span/a[1]/text()').extract()
+        item['name'] = s.select('//*[@id="main-content-title"]/text()').extract()[0]
+        item['cuisine'] = s.select('//*[@id="content"]/div[2]/span/a[1]/text()').extract()[0]
 
         location_items = [s.select(path).extract()[0] for path in self.location_xpaths]
         item['location'] = ", ".join(location_items)
