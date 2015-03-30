@@ -8,10 +8,14 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
 
-BOT_NAME = 'resturantbot'
+BOT_NAME = 'restaurantbot'
 
-SPIDER_MODULES = ['resturantbot.spiders']
-NEWSPIDER_MODULE = 'resturantbot.spiders'
+SPIDER_MODULES = ['restaurantbot.spiders']
+NEWSPIDER_MODULE = 'restaurantbot.spiders'
+
+ITEM_PIPELINES = [
+    'restaurantbot.pipelines.StoreRestaurantItem'
+]
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'resturantbot (+http://www.yourdomain.com)'
