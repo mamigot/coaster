@@ -18,6 +18,12 @@ class StoreRestaurantItem(object):
                         location=item['location'],
                         menu_href=item['menu_href'])
 
-        session.add(r)
-        # write restaurant to the database immediately
-        session.commit()
+        # write restaurants to the database as they come
+        try:
+            session.add(r)
+            session.commit()
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()
