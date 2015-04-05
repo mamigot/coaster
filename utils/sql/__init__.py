@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
 
 from utils.sql.config import DB_ACCESS
 
@@ -11,29 +10,10 @@ from utils.sql.config import DB_ACCESS
 Base = declarative_base()
 
 
-''' Define table metadata '''
-class Restaurant(Base):
-    # An __init__() method is created behind the scenes
-    # http://docs.sqlalchemy.org/en/rel_0_9/orm/tutorial.html#create-an-instance-of-the-mapped-class
-    __tablename__ = 'restaurants'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    cuisine = Column(String, nullable=False)
-    location = Column(String(100), nullable=False)
-    hours = Column(Integer)
-    menu_href = Column(String)
-
-    # pricing and global_rating are based on aggregrate from all review sites
-    pricing = Column(Integer)
-    global_rating = Column(Integer)
-
-    def __repr__(self):
-        return "<Restaurant(name='%s', cuisine='%s')>" % (self.name, self.cuisine)
-
-
-
+''' Run before inserting or selecting items from the database '''
 def create_tables():
+    from models import restaurant, location, schedule_entry
+
     engine = db_connect()
     # MetaData issues CREATE TABLE statements to the database
     # for all tables that don't yet exist
@@ -47,8 +27,13 @@ def db_connect():
 def get_session():
     # http://docs.sqlalchemy.org/en/rel_0_9/orm/tutorial.html#creating-a-session
     # Ex.
-    #   session = get_session()
     #   r = Restaurant(name="Grand Appetito", cuisine="Italian")
+    #   lo = Location(latitude=123.111, longitude=4.0)
+    #   se = ScheduleEntry(day_of_week=2, opening_time="03:12", closing_time="04:00")
+    #   r.location = lo
+    #   r.schedule.append(se)
+    #
+    #   session = get_session()
     #   session.add(r)
     #   session.commit()
 
