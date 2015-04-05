@@ -14,9 +14,9 @@ class Location(Base):
     longitude = Column(Float, nullable=False)
 
     # Ex.
-    #   street_address = 1345 2nd Avenue
-    #   addressLocality = New York
-    #   addressRegion = New York
+    #   street_address = "1345 2nd Avenue"
+    #   addressLocality = "New York"
+    #   addressRegion = "New York"
     #   postalCode = 10021
     street_address = Column(String)
     addressLocality = Column(String)
