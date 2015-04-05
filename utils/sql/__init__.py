@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, relationship, backref
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -12,7 +12,7 @@ Base = declarative_base()
 
 ''' Run before inserting or selecting items from the database '''
 def create_tables():
-    from models import restaurant, location, schedule_entry
+    from main_models import restaurant, location, schedule_entry
 
     engine = db_connect()
     # MetaData issues CREATE TABLE statements to the database
