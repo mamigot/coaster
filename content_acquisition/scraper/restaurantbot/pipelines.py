@@ -5,7 +5,8 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
-from utils.sql import Restaurant, get_session
+from utils.sql import get_session
+from utils.sql.models.restaurant import Restaurant
 
 
 class StoreRestaurantItem(object):
