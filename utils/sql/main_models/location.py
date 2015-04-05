@@ -9,9 +9,9 @@ class Location(Base):
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
 
     # Lat. expresses distance north or south of the Equator
-    latitude = Column(Float, nullable=False)
+    latitude = Column(Float)
     # Lon. expresses distance east or west from the Prime Meridian
-    longitude = Column(Float, nullable=False)
+    longitude = Column(Float)
 
     # Ex.
     #   street_address = "1345 2nd Avenue"
