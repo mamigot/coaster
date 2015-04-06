@@ -18,6 +18,8 @@ class NYMagUserReview(Base):
     service_rating = Column(Integer)
     decor_rating = Column(Integer)
 
-    # Ex. 112 out of 198 people found this review helpful
+    # Ex. "112 out of 198 people found this review helpful"
+    #   review_helpfulness_rating = 112/198
+    #   number_helpfulness_evaluations = 198
     review_helpfulness_rating = Column(Float)
     number_helpfulness_evaluations = Column(Integer)

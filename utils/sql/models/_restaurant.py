@@ -12,10 +12,10 @@ class Restaurant(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     cuisine = Column(String, nullable=False)
-    official_website = Column(String)
+    official_href = Column(String)
 
-    # pricing and global_rating are based on aggregrate from all review sites
-    global_pricing = Column(Integer)
+    pricing = Column(Integer)
+    # global_rating is based on multiple review sites
     global_rating = Column(Integer)
 
     # http://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html#one-to-one

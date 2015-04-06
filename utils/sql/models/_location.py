@@ -22,3 +22,5 @@ class Location(Base):
     addressLocality = Column(String)
     addressRegion = Column(String)
     postalCode = Column(Integer)
+
+    neighborhood = Column(String)
