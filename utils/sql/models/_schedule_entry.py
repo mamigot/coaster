@@ -4,10 +4,10 @@ from utils.sql import Base
 
 class ScheduleEntry(Base):
     # Modeled after http://stackoverflow.com/a/2721596/2708484
-    __tablename__ = 'schedules'
+    __tablename__ = '_schedules'
 
     id = Column(Integer, primary_key=True)
-    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+    restaurant_id = Column(Integer, ForeignKey('_restaurants.id'))
 
     # 1 - Monday, 2 - Tuesday, ..., 7 - Sunday
     day_of_week = Column(Integer, nullable=False)

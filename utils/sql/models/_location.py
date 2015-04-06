@@ -3,10 +3,10 @@ from utils.sql import Base
 
 
 class Location(Base):
-    __tablename__ = 'locations'
+    __tablename__ = '_locations'
 
     id = Column(Integer, primary_key=True)
-    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+    restaurant_id = Column(Integer, ForeignKey('_restaurants.id'))
 
     # Lat. expresses distance north or south of the Equator
     latitude = Column(Float)
