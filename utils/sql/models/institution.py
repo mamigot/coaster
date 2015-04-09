@@ -1,0 +1,13 @@
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+
+from utils.sql import Base
+
+
+class Institution(Base):
+    __tablename__ = 'institutions'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+    courses = relationship("Course")

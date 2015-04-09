@@ -4,5 +4,5 @@ DB_ACCESS = {
     'port': '5432',
     'username': 'miguelamigot',
     'password': '',
-    'database': 'dining'
+    'database': 'edx_courseware'
 }

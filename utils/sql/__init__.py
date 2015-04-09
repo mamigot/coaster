@@ -12,8 +12,7 @@ Base = declarative_base()
 
 ''' Run before inserting or selecting items from the database '''
 def create_tables():
-    from models import _restaurant, _location, _schedule_entry, \
-    listing_nymag, user_review_nymag
+    from models import institution, instructor, subject, course
 
     engine = db_connect()
     # MetaData issues CREATE TABLE statements to the database
