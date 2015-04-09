@@ -27,14 +27,17 @@ def db_connect():
 def get_session():
     # http://docs.sqlalchemy.org/en/rel_0_9/orm/tutorial.html#creating-a-session
     # Ex.
-    #   r = Restaurant(name="Grand Appetito", cuisine="Italian")
-    #   lo = Location(latitude=123.111, longitude=4.0)
-    #   se = ScheduleEntry(day_of_week=2, opening_time="03:12", closing_time="04:00")
-    #   r.location = lo
-    #   r.schedule.append(se)
+    #   institution = Institution(name="Hogwarts")
+    #   course = Course(name="Botany 101", href="http://edx.org/botany-101")
+    #   subject = Subject(name="Engineering")
+    #   instructor = Instructor(name="Ben Bitdiddle")
+    #
+    #   institution.courses.append(course)
+    #   course.subjects.append(subject)
+    #   course.instructors.append(instructor)
     #
     #   session = get_session()
-    #   session.add(r)
+    #   session.add(institution)
     #   session.commit()
 
     engine = db_connect()
