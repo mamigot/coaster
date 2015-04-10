@@ -31,8 +31,6 @@ class EdxCourseFinder(Spider):
         js = json.loads(response.body_as_unicode())
 
         for course_info in js:
-            institution = InstitutionItem(name = course_info['schools'][0])
-
             subjects = []
             if course_info['subjects']:
                 subjects = [SubjectItem(name=s) for s in course_info['subjects']]
@@ -56,6 +54,9 @@ class EdxCourseFinder(Spider):
                 start = course_info['start'],
             )
 
+            institution = InstitutionItem(name = course_info['schools'][0])
+
+            course['institution'] = dict(institution)
             course['subjects'] = [dict(s) for s in subjects]
             course['instructors'] = [dict(i) for i in instructors]
 
@@ -64,7 +65,7 @@ class EdxCourseFinder(Spider):
 
     def course_register(self, course):
         print "\n\n\nTOPOPTPOTPOTPOTPOT\n\n\n\n"
-
+        #self.edx_logger.get_signin_cookies()
         return course
 
 
