@@ -8,14 +8,15 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
 
-BOT_NAME = 'restaurantbot'
+BOT_NAME = 'edx_bot'
 
-SPIDER_MODULES = ['restaurantbot.spiders']
-NEWSPIDER_MODULE = 'restaurantbot.spiders'
+SPIDER_MODULES = ['edx_bot.spiders']
+NEWSPIDER_MODULE = 'edx_bot.spiders'
 
-ITEM_PIPELINES = [
-    'restaurantbot.pipelines.StoreRestaurantItem'
-]
+# http://doc.scrapy.org/en/latest/topics/item-pipeline.html#activating-an-item-pipeline-component
+ITEM_PIPELINES = {
+    'edx_bot.pipelines.CourseExistence': 100
+}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'resturantbot (+http://www.yourdomain.com)'
