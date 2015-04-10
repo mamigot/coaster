@@ -15,7 +15,7 @@ NEWSPIDER_MODULE = 'edx_bot.spiders'
 
 # http://doc.scrapy.org/en/latest/topics/item-pipeline.html#activating-an-item-pipeline-component
 ITEM_PIPELINES = {
-    'edx_bot.pipelines.CourseExistence': 100
+    'edx_bot.pipelines.CoursePlacement': 100
 }
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
