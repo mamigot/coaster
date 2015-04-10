@@ -3,18 +3,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from config import EDX_LOGIN, EDX_PASSWORD
+from edx_bot.spiders.config import EDX_LOGIN, EDX_PASSWORD
 
 
 class EdXLoggerIn(object):
     '''
     Sign into edX and return the cookies for subsequent requests
     '''
-    sign_in_cookies = set()
+    
+    signin_cookies = set()
     login_page = 'https://courses.edx.org/login'
 
 
-    def get_sign_in_cookies(self):
+    def get_signin_cookies(self):
         if self.sign_in_cookies:
             return self.sign_in_cookies
 
@@ -41,11 +42,11 @@ class EdXLoggerIn(object):
                 '//*[@id="dashboard-main"]/section[1]/header/h2/span[2]')))
 
         self.driver.get('https://courses.edx.org/dashboard')
-        self.sign_in_cookies = self.driver.get_cookies()
+        self.signin_cookies = self.driver.get_cookies()
 
         self.driver.close()
-        return self.sign_in_cookies
+        return self.signin_cookies
 
 
-    def delete_sign_in_cookies(self):
-        self.sign_in_cookies = set()
+    def delete_signin_cookies(self):
+        self.signin_cookies = set()

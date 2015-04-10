@@ -6,18 +6,24 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
-from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
 from edx_bot.spiders import EdXLoggerIn
+from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
+from edx_bot.spiders.config import EDX_LOGIN, EDX_PASSWORD
 
 
 class EdxCourseFinder(Spider):
+    '''
+    Fetch a list of the courses on edX and register for them
+    '''
+
     name = 'edx_course_finder'
     allowed_domains = ['edx.org']
     edx_search_url = 'https://www.edx.org/search/api/all'
 
 
     def start_requests(self):
-        self.edx_account_logger = EdXLoggerIn()
+        # Fetch cookies by calling self.edx_account_logger.get_sign_in_cookies()
+        self.edx_logger = EdXLoggerIn()
         return [Request(url=self.edx_search_url, callback=self.parse)]
 
 
@@ -63,4 +69,4 @@ class EdxCourseFinder(Spider):
 
 
     def closed(self, reason):
-        self.edx_account_logger.delete_sign_in_cookies()
+        self.edx_logger.delete_signin_cookies()
