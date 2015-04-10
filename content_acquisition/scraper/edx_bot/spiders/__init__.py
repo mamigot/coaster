@@ -10,14 +10,14 @@ class EdXLoggerIn(object):
     '''
     Sign into edX and return the cookies for subsequent requests
     '''
-    
+
     signin_cookies = set()
     login_page = 'https://courses.edx.org/login'
 
 
     def get_signin_cookies(self):
-        if self.sign_in_cookies:
-            return self.sign_in_cookies
+        if self.signin_cookies:
+            return self.signin_cookies
 
         self.driver = webdriver.Firefox()
         self.driver.maximize_window()
