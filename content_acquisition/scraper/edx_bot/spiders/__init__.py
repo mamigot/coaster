@@ -10,18 +10,16 @@ class EdXLoggerIn(object):
     '''
     Sign into edX and return the cookies for subsequent requests
     '''
-
+    driver = None
     signin_cookies = set()
-    login_page = 'https://courses.edx.org/login'
+    login_href = 'https://courses.edx.org/login'
+    dashboard_href = 'https://courses.edx.org/dashboard'
 
-
-    def get_signin_cookies(self):
-        if self.signin_cookies:
-            return self.signin_cookies
-
-        self.driver = webdriver.Firefox()
+    def __init__(self):
+        self.driver = webdriver.Chrome()
         self.driver.maximize_window()
-        self.driver.get(self.login_page)
+
+        self.driver.get(self.login_href)
 
         form = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.XPATH, '//*[@id="login"]')))
@@ -41,12 +39,10 @@ class EdXLoggerIn(object):
             EC.visibility_of_element_located((By.XPATH,
                 '//*[@id="dashboard-main"]/section[1]/header/h2/span[2]')))
 
-        self.driver.get('https://courses.edx.org/dashboard')
+        self.driver.get(self.dashboard_href)
         self.signin_cookies = self.driver.get_cookies()
 
-        self.driver.close()
-        return self.signin_cookies
 
-
-    def delete_signin_cookies(self):
+    def close(self):
         self.signin_cookies = set()
+        self.driver.close()
