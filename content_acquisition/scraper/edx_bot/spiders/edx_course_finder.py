@@ -1,28 +1,30 @@
 import json
 from scrapy import Spider, Request
 
-from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from edx_bot.spiders import EdXLoggerIn
 from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
 from edx_bot.spiders.config import EDX_LOGIN, EDX_PASSWORD
+
+from utils.sql import get_session, handlers
+from utils.sql.models.course import Course
 
 
 class EdxCourseFinder(Spider):
     '''
     Fetch a list of the courses on edX and register for them
     '''
-
     name = 'edx_course_finder'
     allowed_domains = ['edx.org']
     edx_search_url = 'https://www.edx.org/search/api/all'
-
+    session = None
 
     def start_requests(self):
-        # Fetch cookies by calling self.edx_account_logger.get_sign_in_cookies()
+        self.session = get_session()
         self.edx_logger = EdXLoggerIn()
         return [Request(url=self.edx_search_url, callback=self.parse)]
 
@@ -64,10 +66,31 @@ class EdxCourseFinder(Spider):
 
 
     def course_register(self, course):
-        print "\n\n\nTOPOPTPOTPOTPOTPOT\n\n\n\n"
-        #self.edx_logger.get_signin_cookies()
+        # No need to register for the course if it's already in the database
+        if handlers.get(self.session, Course, Course.edx_guid, course['edx_guid']):
+            return course
+
+        driver = self.edx_logger.driver
+        driver.get(course['href'])
+
+        # Look for element that suggests that we are already enrolled in
+        # the course. If it doesn't exist, then register.
+        try:
+            courseware_element = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, '//*[@id="course-info-page"]/header/div/div/div[3]/div/div/a'))
+                )
+
+        except TimeoutException, NoSuchElementException:
+            enroll_button = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, '//*[@id="course-info-page"]/header/div/div/div[3]/div/div/a'))
+                )
+            enroll_button.click()
+
         return course
 
 
     def closed(self, reason):
-        self.edx_logger.delete_signin_cookies()
+        self.session.close()
+        self.edx_logger.close()
