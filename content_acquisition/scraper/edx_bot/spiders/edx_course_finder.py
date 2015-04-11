@@ -81,6 +81,13 @@ class EdxCourseFinder(Spider):
                     (By.XPATH, '//*[@id="course-info-page"]/header/div/div/div[3]/div/div/a'))
                 )
 
+            # Reject course if the language is not English
+            language = driver.find_element_by_xpath(
+                '//*[@id="course-summary-area"]/ul/li[6]/span[2]').text
+
+            if language != "English":
+                return None
+
         except TimeoutException, NoSuchElementException:
             enroll_button = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located(
