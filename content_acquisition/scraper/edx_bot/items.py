@@ -1,6 +1,19 @@
 from scrapy.item import Item, Field
 
 
+class SubjectItem(Item):
+    name = Field()
+
+
+class InstructorItem(Item):
+    edx_nid = Field()
+    name = Field()
+
+
+class InstitutionItem(Item):
+    name = Field()
+
+
 class CourseItem(Item):
     edx_guid = Field()
     edx_code = Field()
@@ -17,15 +30,33 @@ class CourseItem(Item):
     subjects = Field()
     instructors = Field()
 
+    sections = Field()
+    subsections = Field()
+    units = Field()
+    videos = Field()
 
-class SubjectItem(Item):
+
+class CourseSectionItem(Item):
     name = Field()
 
 
-class InstructorItem(Item):
-    edx_nid = Field()
+class CourseSubsectionItem(Item):
     name = Field()
 
 
-class InstitutionItem(Item):
+class CourseUnitItem(Item):
     name = Field()
+    description = Field()
+
+
+class CourseVideoItem(Item):
+    name = Field()
+    href = Field()
+    transcript = Field()
+
+    youtube_id = Field()
+    yt_views = Field()
+    yt_likes = Field()
+    yt_dislikes = Field()
+    yt_favorites = Field()
+    yt_comments = Field()
