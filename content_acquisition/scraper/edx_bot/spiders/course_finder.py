@@ -16,9 +16,9 @@ from utils.sql.models.course import Course
 
 class EdxCourseFinder(Spider):
     '''
-    Fetch a list of the courses on edX and register for them
+    Fetch a list of the courses on edX and register for them.
     '''
-    name = 'edx_course_finder'
+    name = 'course_finder'
     allowed_domains = ['edx.org']
     edx_search_url = 'https://www.edx.org/search/api/all'
     session = None

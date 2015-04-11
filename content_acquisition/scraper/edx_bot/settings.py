@@ -1,12 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Scrapy settings for resturantbot project
-#
-# For simplicity, this file contains only the most important settings by
-# default. All the other settings are documented here:
-#
-#     http://doc.scrapy.org/en/latest/topics/settings.html
-#
+PROJECT_DIRECTORY_PATH = '/Users/miguelamigot/Software/NYU/WSE/Coaster/'
 
 BOT_NAME = 'edx_bot'
 
@@ -15,8 +7,6 @@ NEWSPIDER_MODULE = 'edx_bot.spiders'
 
 # http://doc.scrapy.org/en/latest/topics/item-pipeline.html#activating-an-item-pipeline-component
 ITEM_PIPELINES = {
-    'edx_bot.pipelines.CoursePlacement': 100
+    'edx_bot.pipelines.course_placement.CoursePlacement': 100,
+    #'edx_bot.pipelines.content_placement.ContentPlacement': 150,
 }
-
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'resturantbot (+http://www.yourdomain.com)'

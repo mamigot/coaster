@@ -11,7 +11,7 @@ from utils.sql.models.course import Course
 
 class CoursePlacement(object):
     '''
-    If a course is not in the database, place it there along with the higher
+    Places the course in the database, along with the higher
     models that it entails: institution, subjects and instructors.
     '''
     session = None

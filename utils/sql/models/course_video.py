@@ -10,8 +10,8 @@ class CourseVideo(Base):
     subsection_id = Column(Integer, ForeignKey('course_units.id'))
     name = Column(String, nullable=False)
 
-    transcript = Column(String)
     href = Column(String, nullable=False)
+    transcript = Column(String)
 
     youtube_id = Column(String(50))
     yt_views = Column(Integer)
