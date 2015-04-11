@@ -2,9 +2,10 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from utils.sql import Base
+from utils.sql.models.course_video import CourseVideo
 
 
-class Unit(Base):
+class CourseUnit(Base):
     __tablename__ = 'course_units'
 
     id = Column(Integer, primary_key=True)

@@ -2,6 +2,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from utils.sql import Base
+from utils.sql.models.course_subsection import CourseSubsection
 
 
 class CourseSection(Base):

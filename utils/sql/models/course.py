@@ -4,6 +4,7 @@ from sqlalchemy import Table, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from utils.sql import Base
+from utils.sql.models.course_section import CourseSection
 
 
 # http://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html#many-to-many
@@ -34,12 +35,12 @@ class Course(Base):
 
     availability = Column(String)
     start = Column(String)
-    # The timezone is UTC
-    crawled_on = Column(DateTime(timezone=True), default=datetime.utcnow)
+    # The timezone is UTC (use datetime.utcnow)
+    crawled_on = Column(DateTime(timezone=True))
 
     # A course may have multiple subjects
     subjects = relationship("Subject", secondary=atable_course_subject)
     instructors = relationship("Instructor", secondary=atable_course_instructor)
 
     # Course data
-    modules = relationship("Module", backref="courses")
+    sections = relationship("CourseSection", backref="courses")
