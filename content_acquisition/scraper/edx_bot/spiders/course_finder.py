@@ -1,5 +1,5 @@
-import json
-from scrapy import Spider, Request
+import time, json
+from scrapy import Spider, Request, log
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -68,25 +68,48 @@ class EdxCourseFinder(Spider):
     def course_register(self, course):
         # No need to register for the course if it's already in the database
         if handlers.get(self.session, Course, Course.edx_guid, course['edx_guid']):
+            msg = "Not parsing course with edx_guid=%s because it's in the DB." \
+                % (str(course['edx_guid']))
+            log.msg(msg, level=log.INFO)
             return course
+
+        msg = "Parsing course with edx_guid=%s" % (str(course['edx_guid']))
+        log.msg(msg, level=log.INFO)
 
         driver = self.edx_logger.driver
         driver.get(course['href'])
+        driver.maximize_window()
+        # Space requests out by 2 seconds
+        time.sleep(2)
 
         # Look for element that suggests that we are already enrolled in
         # the course. If it doesn't exist, then register.
         try:
-            courseware_element = WebDriverWait(driver, 5).until(
+            courseware_element = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located(
                     (By.XPATH, '//*[@id="course-info-page"]/header/div/div/div[3]/div/div/a'))
                 )
 
             # Reject course if the language is not English
-            language = driver.find_element_by_xpath(
-                '//*[@id="course-summary-area"]/ul/li[6]/span[2]').text
+            try:
+                language = driver.find_element_by_xpath(
+                    '//*[@id="course-summary-area"]/ul/li[6]/span[2]').text
 
-            if language != "English":
+                if language != "English":
+                    msg = "Rejected course with (edx_guid, url)=(%s, %s) " \
+                        " its language is not English" % \
+                            (str(course['edx_guid']), course['href'])
+                    log.msg(msg, level=log.WARNING)
+                    return None
+
+            except:
+                msg = "Rejected course with (edx_guid, url)=(%s, %s) because " \
+                    "its language could not be determined" % \
+                        (str(course['edx_guid']), course['href'])
+                log.msg(msg, level=log.WARNING)
+
                 return None
+
 
         except TimeoutException, NoSuchElementException:
             enroll_button = WebDriverWait(driver, 5).until(
@@ -95,6 +118,12 @@ class EdxCourseFinder(Spider):
                 )
             enroll_button.click()
 
+            msg = "Enrolled into course with edx_guid=%s" % (str(course['edx_guid']))
+            log.msg(msg, level=log.INFO)
+
+        msg = "Returned course with edx_guid=%s to the pipelines." \
+            % (str(course['edx_guid']))
+        log.msg(msg, level=log.INFO)
         return course
 
 
