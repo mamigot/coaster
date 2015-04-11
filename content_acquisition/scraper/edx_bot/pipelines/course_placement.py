@@ -17,7 +17,7 @@ class CoursePlacement(object):
     session = None
 
     def process_item(self, item, spider):
-        if spider.name not in ['edx_course_finder']:
+        if spider.name not in ['course_finder']:
             return item
 
         self.session = get_session()
