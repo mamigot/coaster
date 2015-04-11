@@ -112,14 +112,21 @@ class EdxCourseFinder(Spider):
 
 
         except TimeoutException, NoSuchElementException:
-            enroll_button = WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, '//*[@id="course-info-page"]/header/div/div/div[3]/div/div/a'))
-                )
-            enroll_button.click()
+            try:
+                enroll_button = WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located(
+                        (By.XPATH, '//*[@id="course-info-page"]/header/div/div/div[3]/div/div/a'))
+                    )
+                enroll_button.click()
 
-            msg = "Enrolled into course with edx_guid=%s" % (str(course['edx_guid']))
-            log.msg(msg, level=log.INFO)
+                msg = "Enrolled into course with edx_guid=%s" % (str(course['edx_guid']))
+                log.msg(msg, level=log.INFO)
+                
+            except TimeoutException:
+                msg = "Timed out when enrolling into course with edx_guid=%s" \
+                    % (str(course['edx_guid']))
+                log.msg(msg, level=log.WARNING)
+
 
         msg = "Returned course with edx_guid=%s to the pipelines." \
             % (str(course['edx_guid']))
