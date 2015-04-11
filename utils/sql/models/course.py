@@ -7,12 +7,12 @@ from utils.sql import Base
 
 
 # http://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html#many-to-many
-course_subject_atable = Table('course_subject_atable', Base.metadata,
+atable_course_subject = Table('atable_course_subject', Base.metadata,
     Column('subject_id', Integer, ForeignKey('subjects.id')),
     Column('course_id', Integer, ForeignKey('courses.id'))
 )
 
-course_instructor_atable = Table('course_instructor_atable', Base.metadata,
+atable_course_instructor = Table('atable_course_instructor', Base.metadata,
     Column('instructor_id', Integer, ForeignKey('instructors.id')),
     Column('course_id', Integer, ForeignKey('courses.id'))
 )
@@ -38,5 +38,8 @@ class Course(Base):
     crawled_on = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     # A course may have multiple subjects
-    subjects = relationship("Subject", secondary=course_subject_atable)
-    instructors = relationship("Instructor", secondary=course_instructor_atable)
+    subjects = relationship("Subject", secondary=atable_course_subject)
+    instructors = relationship("Instructor", secondary=atable_course_instructor)
+
+    # Course data
+    modules = relationship("Module", backref="courses")
