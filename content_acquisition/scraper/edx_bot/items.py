@@ -31,22 +31,22 @@ class CourseItem(Item):
     instructors = Field()
 
     sections = Field()
-    subsections = Field()
-    units = Field()
-    videos = Field()
 
 
 class CourseSectionItem(Item):
     name = Field()
+    subsections = Field()
 
 
 class CourseSubsectionItem(Item):
     name = Field()
+    units = Field()
 
 
 class CourseUnitItem(Item):
     name = Field()
     description = Field()
+    videos = Field()
 
 
 class CourseVideoItem(Item):
