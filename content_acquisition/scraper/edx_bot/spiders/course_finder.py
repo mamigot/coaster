@@ -6,8 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from utils.sql import get_session, handlers
-from utils.sql.models.course import Course
+from utils.sql import get_session
 
 from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
 
