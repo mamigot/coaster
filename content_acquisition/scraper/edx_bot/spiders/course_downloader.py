@@ -10,6 +10,8 @@ from utils.sql import get_session, handlers
 from utils.sql.models.course import Course
 
 from edx_bot.spiders import EdXLoggerIn
+from edx_bot.items import CourseItem, CourseSectionItem, CourseSubsectionItem \
+    CourseUnitItem, CourseVideoItem
 
 
 class EdXCourseDownloader(Spider):
@@ -25,13 +27,18 @@ class EdXCourseDownloader(Spider):
     def start_requests(self):
         self.session = get_session()
         self.edx_logger = EdXLoggerIn()
-
+        '''
         # Get courses that haven't been crawled yet and register for them
         for c in self.session.query(Course).filter(Course.crawled_on == None):
             yield Request(
                 url = c.href,
-                meta = {'db_course': Course},
-                callback = self.register_for_course)
+                callback = self.register_for_course
+            )
+        TESTING TESTING TESTING'''
+        yield Request(
+            url = 'https://www.edx.org/course/signals-systems-part-1-iitbombayx-ee210-1x',
+            callback = self.register_for_course
+        )
 
 
     def register_for_course(self, response):
@@ -82,56 +89,51 @@ class EdXCourseDownloader(Spider):
             log.msg(msg, level=log.ERROR)
             return None
 
-
-        # SCRAPE THE COURSE'S CONTENTS... Request(url=..., callback=...)
-        return None
-
-
-    def course_is_in_english(self, driver):
-        '''
-        Provided a driver that's at the course's homepage (i.e.
-        driver.current_url = course_homepage_url), returns True
-        if the course is in English.
-        '''
-        description_elements = driver.find_elements_by_xpath(
-            '//*[@id="course-summary-area"]/ul/li')
-
-        for e in description_elements:
-            if 'Languages: English' in e.text:
-                return True
-
-        return False
+        return Request(
+            url = course_homepage_url,
+            callback = self.crawl_course,
+            dont_filter=True
+        )
 
 
     def crawl_course(self, response):
-        '''
-        if course is current, etc.:
-            go to courseware page
+        driver = self.edx_logger.driver
+        driver.maximize_window()
+        driver.get(response.url)
 
+        if self.course_is_accessible(driver):
+            '''
+            Go to the courseware page
+            '''
+            pass
+
+        else:
+            return None
+
+        '''
+        initialize section and subsection items
+        with former's names and latter's names and links
+        '''
+        course_nav_elements = driver.find_elements_by_xpath(
+            '//*[@id="accordion"]/nav'
+        )
         sections = []
-        for s in section_elements:
-            sections.append(self.crawl_section(s))
+        for section in course_nav_elements:
+            '''
+            initialize section
+            initialize list of subsections
 
-        # create course item and add sections to it
+            crawl each subsection
+            '''
+            pass
         '''
-
-
-    def crawl_section(self, response):
+        assemble sections into course item and return it
         '''
-        subsections = []
-        for s in subsection_elements:
-            subsections.append(self.crawl_subsection(s))
-
-        # create section items and add subsections to it
-        '''
-        pass
 
 
     def crawl_subsection(self, response):
         '''
-        units = []
-        for u in unit_elements:
-            units.append(self.crawl_unit(u))
+        build unit elements as long as they're video-oriented
         '''
         pass
 
@@ -142,6 +144,10 @@ class EdXCourseDownloader(Spider):
         videos = []
         for v in video_elements:
             add youtube stats to v
+
+            get transcript if possible
+            (if not possible through scrapy (and response.body), use
+            the requests library)
         '''
         pass
 
@@ -151,6 +157,32 @@ class EdXCourseDownloader(Spider):
         identify youtube_id from link and call the API
 
         return stats in a dictionary
+        '''
+        pass
+
+
+    def course_is_in_english(self, driver):
+        '''
+        Provided a driver that's at the course's homepage (i.e.
+        driver.current_url = course_homepage_url), returns True
+        if the course is in English.
+        '''
+        description_elements = driver.find_elements_by_xpath(
+            '//*[@id="course-summary-area"]/ul/li'
+        )
+
+        for e in description_elements:
+            if 'Languages: English' in e.text:
+                return True
+
+        return False
+
+
+    def course_is_accessible(self, driver):
+        '''
+        Provided a driver that's at the course's homepage, returns
+        True if the course is currently accessible. Otherwise,
+        returns False (possibly because the course hasn't started yet, etc.).
         '''
         pass
 
