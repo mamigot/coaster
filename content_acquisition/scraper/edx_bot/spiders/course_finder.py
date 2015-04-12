@@ -6,12 +6,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from edx_bot.spiders import EdXLoggerIn
-from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
-from edx_bot.spiders.config import EDX_LOGIN, EDX_PASSWORD
-
 from utils.sql import get_session, handlers
 from utils.sql.models.course import Course
+
+from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
 
 
 class EdxCourseFinder(Spider):
@@ -25,7 +23,6 @@ class EdxCourseFinder(Spider):
 
     def start_requests(self):
         self.session = get_session()
-        self.edx_logger = EdXLoggerIn()
         return [Request(url=self.edx_search_url, callback=self.parse)]
 
 
@@ -67,4 +64,3 @@ class EdxCourseFinder(Spider):
 
     def closed(self, reason):
         self.session.close()
-        self.edx_logger.close()
