@@ -89,7 +89,8 @@ class EdXCourseDownloader(Spider):
 
     def course_is_in_english(self, driver):
         '''
-        Provided a driver that's at the course's homepage, returns True
+        Provided a driver that's at the course's homepage (i.e.
+        driver.current_url = course_homepage_url), returns True
         if the course is in English.
         '''
         description_elements = driver.find_elements_by_xpath(
@@ -104,27 +105,53 @@ class EdXCourseDownloader(Spider):
 
     def crawl_course(self, response):
         '''
-        assemble all course data (yield full course)
+        if course is current, etc.:
+            go to courseware page
+
+        sections = []
+        for s in section_elements:
+            sections.append(self.crawl_section(s))
+
+        # create course item and add sections to it
         '''
-        print "\n\nSUP SON\n\n"
-        print response.url
-        course = response.meta['db_course']
-        print course.__mapper__.columns.__dict__
 
 
     def crawl_section(self, response):
+        '''
+        subsections = []
+        for s in subsection_elements:
+            subsections.append(self.crawl_subsection(s))
+
+        # create section items and add subsections to it
+        '''
         pass
 
 
     def crawl_subsection(self, response):
+        '''
+        units = []
+        for u in unit_elements:
+            units.append(self.crawl_unit(u))
+        '''
         pass
 
 
     def crawl_unit(self, response):
+        '''
+        description = ...
+        videos = []
+        for v in video_elements:
+            add youtube stats to v
+        '''
         pass
 
 
-    def get_youtube_stats(self, video_id):
+    def get_youtube_stats(self, video_href):
+        '''
+        identify youtube_id from link and call the API
+
+        return stats in a dictionary
+        '''
         pass
 
 
