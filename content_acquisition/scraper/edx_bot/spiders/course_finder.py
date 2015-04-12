@@ -67,7 +67,7 @@ class EdxCourseFinder(Spider):
 
     def course_register(self, course):
         # No need to register for the course if it's already in the database
-        if handlers.get(self.session, Course, Course.edx_guid, course['edx_guid']):
+        if handlers.get_row(self.session, Course, Course.edx_guid, course['edx_guid']):
             msg = "Not parsing course with edx_guid=%s because it's in the DB." \
                 % (str(course['edx_guid']))
             log.msg(msg, level=log.INFO)
@@ -121,7 +121,7 @@ class EdxCourseFinder(Spider):
 
                 msg = "Enrolled into course with edx_guid=%s" % (str(course['edx_guid']))
                 log.msg(msg, level=log.INFO)
-                
+
             except TimeoutException:
                 msg = "Timed out when enrolling into course with edx_guid=%s" \
                     % (str(course['edx_guid']))

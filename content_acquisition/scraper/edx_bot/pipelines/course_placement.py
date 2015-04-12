@@ -1,7 +1,7 @@
 from scrapy.exceptions import DropItem
 
 from utils.sql import get_session
-from utils.sql.handlers import get
+from utils.sql.handlers import get_row
 
 from utils.sql.models.institution import Institution
 from utils.sql.models.instructor import Instructor
@@ -21,10 +21,10 @@ class CoursePlacement(object):
             return item
 
         self.session = get_session()
-        course = get(self.session, Course, Course.edx_guid, item['edx_guid'])
+        course = get_row(self.session, Course, Course.edx_guid, item['edx_guid'])
 
         if not course:
-            institution = get(self.session, Institution,
+            institution = get_row(self.session, Institution,
                 Institution.name, item['institution']['name'])
             if not institution:
                 institution = Institution(name = item['institution']['name'])
@@ -33,7 +33,7 @@ class CoursePlacement(object):
             for item_subject in item['subjects']:
                 if not item_subject['name']: continue
 
-                subject = get(self.session, Subject, Subject.name, item_subject['name'])
+                subject = get_row(self.session, Subject, Subject.name, item_subject['name'])
                 if not subject:
                     subject = Subject(name = item_subject['name'])
                 subjects.append(subject)
@@ -42,7 +42,7 @@ class CoursePlacement(object):
             for item_instructor in item['instructors']:
                 if not item_instructor['edx_nid']: continue
 
-                instructor = get(self.session, Instructor,
+                instructor = get_row(self.session, Instructor,
                     Instructor.edx_nid, item_instructor['edx_nid'])
                 if not instructor:
                     instructor = Instructor(
