@@ -35,11 +35,18 @@ class EdXCourseDownloader(Spider):
 
 
     def register_for_course(self, response):
+        '''
+        Registers for course (or checks that it has been registered) before
+        sending it to be crawled. Discards courses that are not in English
+        or problematic.
+        '''
         course_homepage_url = response.url
 
         driver = self.edx_logger.driver
         driver.maximize_window()
         driver.get(course_homepage_url)
+        # Space requests out by 2 seconds
+        time.sleep(2)
 
         try:
             enroll_or_open_button_xpath = \
@@ -51,27 +58,32 @@ class EdXCourseDownloader(Spider):
             if enroll_or_open_button.text == "Enroll Now":
                 if self.course_is_in_english(driver):
                     enroll_or_open_button.click()
+                    # Allow enough time for edX to process the registration
                     time.sleep(6)
 
                     if driver.current_url != course_homepage_url:
                         msg = "Enrolled into course with url=%s" % (course_homepage_url)
                         log.msg(msg, level=log.INFO)
                     else:
-                        msg = "Trouble enrolling into course with url=%s" % (course_homepage_url)
+                        msg = "Trouble enrolling into course with url=%s. Discarding." % (course_homepage_url)
                         log.msg(msg, level=log.ERROR)
+                        return None
                 else:
-                    msg = "Course with url=%s" % (course_homepage_url)
+                    msg = "Course with url=%s is not in English. Discarding." % (course_homepage_url)
                     log.msg(msg, level=log.INFO)
+                    return None
 
             else:
                 msg = "Was already enrolled into course with url=%s" % (course_homepage_url)
                 log.msg(msg, level=log.INFO)
 
         except TimeoutException:
-            msg = "TimeoutException for course with url=%s" % (course_homepage_url)
-            log.msg(msg, level=log.WARNING)
+            msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
+            log.msg(msg, level=log.ERROR)
+            return None
 
-        time.sleep(2)
+
+        # SCRAPE THE COURSE'S CONTENTS... Request(url=..., callback=...)
         return None
 
 
