@@ -52,19 +52,26 @@ class EdXCourseDownloader(Spider):
                 if self.course_is_in_english(driver):
                     enroll_or_open_button.click()
                     time.sleep(6)
-                    msg = "Enrolled for course with url=%s" % (course_homepage_url)
-                else:
-                    raise
-            else:
-                msg = "Was already enrolled for course with url=%s" % (course_homepage_url)
 
-            log.msg(msg, level=log.INFO)
-            time.sleep(2)
+                    if driver.current_url != course_homepage_url:
+                        msg = "Enrolled into course with url=%s" % (course_homepage_url)
+                        log.msg(msg, level=log.INFO)
+                    else:
+                        msg = "Trouble enrolling into course with url=%s" % (course_homepage_url)
+                        log.msg(msg, level=log.ERROR)
+                else:
+                    msg = "Course with url=%s" % (course_homepage_url)
+                    log.msg(msg, level=log.INFO)
+
+            else:
+                msg = "Was already enrolled into course with url=%s" % (course_homepage_url)
+                log.msg(msg, level=log.INFO)
 
         except TimeoutException:
-            msg = "Course with url=%s deemed INVALID." % (course_homepage_url)
+            msg = "TimeoutException for course with url=%s" % (course_homepage_url)
             log.msg(msg, level=log.WARNING)
 
+        time.sleep(2)
         return None
 
 
@@ -77,7 +84,7 @@ class EdXCourseDownloader(Spider):
             '//*[@id="course-summary-area"]/ul/li')
 
         for e in description_elements:
-            if e.text == 'Languages: English':
+            if 'Languages: English' in e.text:
                 return True
 
         return False
