@@ -1,5 +1,6 @@
 import time
 from scrapy import Spider, Request, log
+from scrapy.selector import Selector
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -10,7 +11,7 @@ from utils.sql import get_session, handlers
 from utils.sql.models.course import Course
 
 from edx_bot.spiders import EdXLoggerIn
-from edx_bot.items import CourseItem, CourseSectionItem, CourseSubsectionItem \
+from edx_bot.items import CourseItem, CourseSectionItem, CourseSubsectionItem, \
     CourseUnitItem, CourseVideoItem
 
 
@@ -101,34 +102,32 @@ class EdXCourseDownloader(Spider):
         driver.maximize_window()
         driver.get(response.url)
 
-        if self.course_is_accessible(driver):
-            '''
-            Go to the courseware page
-            '''
-            pass
+        open_button = self.get_access_to_course(driver, response.url)
+        if open_button:
+            open_button.click()
+            time.sleep(6)
+
+            courseware_xpath = '//*[@id="content"]/nav/div/ol/li[1]/a'
+            courseware_button = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, courseware_xpath)))
+
+            courseware_button.click()
+            time.sleep(2)
 
         else:
             return None
 
-        '''
-        initialize section and subsection items
-        with former's names and latter's names and links
-        '''
-        course_nav_elements = driver.find_elements_by_xpath(
-            '//*[@id="accordion"]/nav'
-        )
-        sections = []
-        for section in course_nav_elements:
-            '''
-            initialize section
-            initialize list of subsections
+        source = Selector(text = driver.page_source)
 
-            crawl each subsection
-            '''
-            pass
-        '''
-        assemble sections into course item and return it
-        '''
+        for section_element in driver.find_elements_by_class_name('chapter'):
+            self.crawl_section(section_element)
+
+
+    def crawl_section(self, section_element):
+        section_title = section_element.find_element_by_xpath('.//h3/a').text
+
+        print section_title
 
 
     def crawl_subsection(self, response):
@@ -152,15 +151,6 @@ class EdXCourseDownloader(Spider):
         pass
 
 
-    def get_youtube_stats(self, video_href):
-        '''
-        identify youtube_id from link and call the API
-
-        return stats in a dictionary
-        '''
-        pass
-
-
     def course_is_in_english(self, driver):
         '''
         Provided a driver that's at the course's homepage (i.e.
@@ -178,13 +168,33 @@ class EdXCourseDownloader(Spider):
         return False
 
 
-    def course_is_accessible(self, driver):
+    def get_access_to_course(self, driver, course_homepage_url):
         '''
-        Provided a driver that's at the course's homepage, returns
-        True if the course is currently accessible. Otherwise,
-        returns False (possibly because the course hasn't started yet, etc.).
+        Provided a driver that's at the course's homepage, returns the
+        button to open the course if it's accessible, and None otherwise.
         '''
-        pass
+        try:
+            open_button_xpath = \
+                '//*[@id="course-info-page"]/header/div/div/div[3]/div/div/a'
+            open_button = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, open_button_xpath)))
+
+            if open_button.text == "Open Course":
+                msg = "May access course with url=%s" % (course_homepage_url)
+                log.msg(msg, level=log.INFO)
+                return open_button
+
+            else:
+                msg = "Cannot access course with url=%s. Says: '%s'" % \
+                    (course_homepage_url, open_button.text)
+                log.msg(msg, level=log.INFO)
+                return None
+
+        except TimeoutException:
+            msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
+            log.msg(msg, level=log.ERROR)
+            return None
 
 
     def closed(self, reason):
