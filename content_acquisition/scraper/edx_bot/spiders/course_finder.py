@@ -14,7 +14,11 @@ from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionIt
 
 class EdxCourseFinder(Spider):
     '''
-    Fetch a list of the courses on edX and register for them.
+    Using edX's search API (see 'edx_search_url' below), retrieves a list
+    of its courses and places them in the database. This doesn't mean,
+    however, that all of them will be crawled. That will be up to subsequent
+    spiders, that will decide whether to register into them or crawl their
+    content according to its own criteria.
     '''
     name = 'course_finder'
     allowed_domains = ['edx.org']
