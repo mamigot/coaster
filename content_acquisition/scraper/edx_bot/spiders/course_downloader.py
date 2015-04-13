@@ -28,18 +28,15 @@ class EdXCourseDownloader(Spider):
     def start_requests(self):
         self.session = get_session()
         self.edx_logger = EdXLoggerIn()
-        '''
         # Get courses that haven't been crawled yet and register for them
-        for c in self.session.query(Course).filter(Course.crawled_on == None):
+        ''' CURRENT SOLUTION IS FOR TESTING PURPOSES '''
+        ''' self.session.query(Course).filter(Course.crawled_on == None) '''
+        for c in self.session.query(Course).filter(Course.edx_guid == 4421):
             yield Request(
                 url = c.href,
+                meta = {'course_edx_guid':c.edx_guid},
                 callback = self.register_for_course
             )
-        TESTING TESTING TESTING'''
-        yield Request(
-            url = 'https://www.edx.org/course/signals-systems-part-1-iitbombayx-ee210-1x',
-            callback = self.register_for_course
-        )
 
 
     def register_for_course(self, response):
@@ -92,6 +89,7 @@ class EdXCourseDownloader(Spider):
 
         return Request(
             url = course_homepage_url,
+            meta = response.meta,
             callback = self.crawl_course,
             dont_filter=True
         )
@@ -120,21 +118,40 @@ class EdXCourseDownloader(Spider):
 
         source = Selector(text = driver.page_source)
 
-        for section_element in driver.find_elements_by_class_name('chapter'):
-            self.crawl_section(section_element)
+        sections = []
+        for section_el in driver.find_elements_by_class_name('chapter'):
+            sections.append( self.crawl_section(section_el) )
+
+        return CourseItem(
+            edx_guid = response.meta['course_edx_guid'],
+            sections = [dict(s) for s in sections]
+        )
 
 
-    def crawl_section(self, section_element):
-        section_title = section_element.find_element_by_xpath('.//h3/a').text
+    def crawl_section(self, section_el):
+        section_title = section_el.find_element_by_xpath('.//h3/a').text
 
-        print section_title
+        subsections = []
+        for subsection_el in section_el.find_elements_by_xpath('.//ul/li'):
+            subsections.append( self.crawl_subsection(subsection_el) )
+
+        return CourseSectionItem(
+            name = section_title,
+            subsections = [dict(s) for s in subsections]
+        )
 
 
-    def crawl_subsection(self, response):
-        '''
-        build unit elements as long as they're video-oriented
-        '''
-        pass
+    def crawl_subsection(self, subsection_el):
+        source = Selector(text = subsection_el.get_attribute('innerHTML'))
+
+        subsection_title = source.xpath('//a/p[1]/text()').extract()[0]
+        subsection_link = subsection_el.find_element_by_xpath('.//a').get_attribute("href")
+
+        # CRAWL UNITS
+
+        return CourseSubsectionItem(
+            name = subsection_title,
+        )
 
 
     def crawl_unit(self, response):
