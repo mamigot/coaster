@@ -247,7 +247,10 @@ class EdXCourseDownloader(Spider):
                     written_content += "\n" + p.text
 
             elif data_type == 'video':
-                pass
+                video_title = module.find_element_by_xpath('.//h2').text
+                youtube_embed_url = module.find_element_by_xpath(\
+                    './/div/div/article/section/iframe').get_attribute('src')
+
 
 
     def closed(self, reason):
