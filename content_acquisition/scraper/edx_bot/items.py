@@ -41,6 +41,7 @@ class CourseSectionItem(Item):
 class CourseSubsectionItem(Item):
     name = Field()
     units = Field()
+    href = Field()
 
 
 class CourseUnitItem(Item):

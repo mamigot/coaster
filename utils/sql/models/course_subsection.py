@@ -11,5 +11,6 @@ class CourseSubsection(Base):
     id = Column(Integer, primary_key=True)
     section_id = Column(Integer, ForeignKey('course_sections.id'))
     name = Column(String, nullable=False)
+    href = Column(String)
 
     units = relationship('CourseUnit', backref='course_subsections')
