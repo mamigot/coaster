@@ -235,12 +235,17 @@ class EdXCourseDownloader(Spider):
         msg = "Crawling unit '%s'." % (unit_title)
         log.msg(msg, level=log.INFO)
 
+        written_content = ""
+
         for module in driver.find_elements_by_xpath('//*[@id="seq_content"]/div/div/div'):
             module = module.find_element_by_xpath('.//div')
             data_type = module.get_attribute('data-block-type')
 
             if data_type == 'html':
-                pass
+                paragraphs = module.find_elements_by_xpath('.//p/span')
+                for p in paragraphs:
+                    written_content += "\n" + p.text
+
             elif data_type == 'video':
                 pass
 
