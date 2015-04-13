@@ -4,8 +4,8 @@ from collections import OrderedDict
 from scrapy import Spider, Request, log
 from scrapy.selector import Selector
 
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
@@ -172,19 +172,29 @@ class EdXCourseDownloader(Spider):
         except:
             return None
 
-        edx_guid = response.meta['course_edx_guid']
-
         # Dict mapping section titles to dicts mapping subsection titles to links
         section_overviews = self.get_section_overviews(driver)
+        section_items = []
 
-        for section_title, subsections in section_overviews.items():
+        for section_title, subsection_mappings in section_overviews.items():
             msg = "Crawling section '%s'." % (section_title)
             log.msg(msg, level=log.INFO)
 
-            for ss_title, ss_link in subsections.items():
-                self.crawl_subsection(driver, ss_title, ss_link)
+            subsection_items = []
+            for ss_title, ss_link in subsection_mappings.items():
+                subsection_items.append(
+                    self.crawl_subsection(driver, ss_title, ss_link)
+                )
 
-        return None
+            section_items.append(CourseSectionItem(
+                name = section_title,
+                subsections = [dict(s) for s in subsection_items]
+            ))
+
+        return CourseItem(
+            edx_guid = response.meta['course_edx_guid'],
+            sections = [dict(s) for s in section_items]
+        )
 
 
     def get_section_overviews(self, driver):
@@ -219,6 +229,8 @@ class EdXCourseDownloader(Spider):
         driver.get(subsection_link)
         time.sleep(6)
 
+        units = []
+
         for unit_el in driver.find_elements_by_xpath('//*[@id="sequence-list"]/li'):
             sub = unit_el.find_element_by_xpath('.//a')
 
@@ -228,13 +240,19 @@ class EdXCourseDownloader(Spider):
 
                 sub.click()
                 time.sleep(2)
-                self.crawl_unit(driver, unit_title)
+                units.append( self.crawl_unit(driver, unit_title) )
+
+        return CourseSubsectionItem(
+            name = subsection_title,
+            units = [dict(u) for u in units]
+        )
 
 
     def crawl_unit(self, driver, unit_title):
         msg = "Crawling unit '%s'." % (unit_title)
         log.msg(msg, level=log.INFO)
 
+        videos = []
         written_content = ""
 
         for module in driver.find_elements_by_xpath('//*[@id="seq_content"]/div/div/div'):
@@ -247,10 +265,22 @@ class EdXCourseDownloader(Spider):
                     written_content += "\n" + p.text
 
             elif data_type == 'video':
-                video_title = module.find_element_by_xpath('.//h2').text
+                name = module.find_element_by_xpath('.//h2').text
                 youtube_embed_url = module.find_element_by_xpath(\
                     './/div/div/article/section/iframe').get_attribute('src')
 
+                #>> TODO: Get video transcripts
+
+                videos.append(CourseVideoItem(
+                    name = name,
+                    href = youtube_embed_url
+                ))
+
+        return CourseUnitItem(
+            name = unit_title,
+            description = written_content,
+            videos = [dict(v) for v in videos]
+        )
 
 
     def closed(self, reason):
