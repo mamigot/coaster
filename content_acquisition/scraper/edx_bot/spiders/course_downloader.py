@@ -1,4 +1,6 @@
 import time
+from collections import OrderedDict
+
 from scrapy import Spider, Request, log
 from scrapy.selector import Selector
 
@@ -95,79 +97,6 @@ class EdXCourseDownloader(Spider):
         )
 
 
-    def crawl_course(self, response):
-        driver = self.edx_logger.driver
-        driver.maximize_window()
-        driver.get(response.url)
-
-        open_button = self.get_access_to_course(driver, response.url)
-        if open_button:
-            open_button.click()
-            time.sleep(6)
-
-            courseware_xpath = '//*[@id="content"]/nav/div/ol/li[1]/a'
-            courseware_button = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, courseware_xpath)))
-
-            courseware_button.click()
-            time.sleep(2)
-
-        else:
-            return None
-
-        source = Selector(text = driver.page_source)
-
-        sections = []
-        for section_el in driver.find_elements_by_class_name('chapter'):
-            sections.append( self.crawl_section(section_el) )
-
-        return CourseItem(
-            edx_guid = response.meta['course_edx_guid'],
-            sections = [dict(s) for s in sections]
-        )
-
-
-    def crawl_section(self, section_el):
-        section_title = section_el.find_element_by_xpath('.//h3/a').text
-
-        subsections = []
-        for subsection_el in section_el.find_elements_by_xpath('.//ul/li'):
-            subsections.append( self.crawl_subsection(subsection_el) )
-
-        return CourseSectionItem(
-            name = section_title,
-            subsections = [dict(s) for s in subsections]
-        )
-
-
-    def crawl_subsection(self, subsection_el):
-        source = Selector(text = subsection_el.get_attribute('innerHTML'))
-
-        subsection_title = source.xpath('//a/p[1]/text()').extract()[0]
-        subsection_link = subsection_el.find_element_by_xpath('.//a').get_attribute("href")
-
-        # CRAWL UNITS
-
-        return CourseSubsectionItem(
-            name = subsection_title,
-        )
-
-
-    def crawl_unit(self, response):
-        '''
-        description = ...
-        videos = []
-        for v in video_elements:
-            add youtube stats to v
-
-            get transcript if possible
-            (if not possible through scrapy (and response.body), use
-            the requests library)
-        '''
-        pass
-
-
     def course_is_in_english(self, driver):
         '''
         Provided a driver that's at the course's homepage (i.e.
@@ -185,7 +114,7 @@ class EdXCourseDownloader(Spider):
         return False
 
 
-    def get_access_to_course(self, driver, course_homepage_url):
+    def access_course(self, driver, course_homepage_url):
         '''
         Provided a driver that's at the course's homepage, returns the
         button to open the course if it's accessible, and None otherwise.
@@ -200,18 +129,121 @@ class EdXCourseDownloader(Spider):
             if open_button.text == "Open Course":
                 msg = "May access course with url=%s" % (course_homepage_url)
                 log.msg(msg, level=log.INFO)
-                return open_button
+
+                open_button.click()
+                time.sleep(6)
+
+                courseware_xpath = '//*[@id="content"]/nav/div/ol/li[1]/a'
+                courseware_button = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located(
+                        (By.XPATH, courseware_xpath)))
+
+                courseware_button.click()
+                time.sleep(2)
+
+                if driver.current_url != course_homepage_url:
+                    msg = "Opened course with url=%s" % (course_homepage_url)
+                    log.msg(msg, level=log.INFO)
+
+                else:
+                    msg = "Trouble opening course with url=%s. Discarding." % (course_homepage_url)
+                    log.msg(msg, level=log.ERROR)
+                    raise
 
             else:
                 msg = "Cannot access course with url=%s. Says: '%s'" % \
                     (course_homepage_url, open_button.text)
                 log.msg(msg, level=log.INFO)
-                return None
+                raise
 
         except TimeoutException:
             msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
             log.msg(msg, level=log.ERROR)
+            raise
+
+
+    def crawl_course(self, response):
+        driver = self.edx_logger.driver
+        driver.maximize_window()
+        driver.get(response.url)
+
+        try:
+            self.access_course(driver, response.url)
+        except:
             return None
+
+        edx_guid = response.meta['course_edx_guid']
+
+        # Dict mapping section titles to dicts mapping subsection titles to links
+        section_overviews = self.get_section_overviews(driver)
+
+        for section_title, subsections in section_overviews.items():
+            msg = "Crawling section '%s'." % (section_title)
+            log.msg(msg, level=log.INFO)
+
+            for ss_title, ss_link in subsections.items():
+                msg = "Crawling subsection '%s' with url=%s" \
+                    % (ss_title, ss_link)
+                log.msg(msg, level=log.INFO)
+
+                print "\t" + ss_title
+                print "\t\t" + ss_link
+                self.crawl_subsection(driver, ss_link)
+
+        return None
+
+
+    def get_section_overviews(self, driver):
+        '''
+        Assemble sections (names) and subsections (names and links)
+        in order to crawl them later --use an ordered dictionary mapping
+        section names to ordered dictionaries mapping subsection names
+        to subsection links.
+        '''
+        sections = OrderedDict()
+        for section_el in driver.find_elements_by_class_name('chapter'):
+            section_title = section_el.find_element_by_xpath('.//h3/a').text
+
+            subsections = OrderedDict()
+            for subsection_el in section_el.find_elements_by_xpath('.//ul/li'):
+                source = Selector(text = subsection_el.get_attribute('innerHTML'))
+
+                subsection_title = source.xpath('//a/p[1]/text()').extract()[0]
+                subsection_link = subsection_el.find_element_by_xpath('.//a').get_attribute('href')
+                subsections[subsection_title] = subsection_link
+
+            sections[section_title] = subsections
+
+        return sections
+
+
+    def crawl_subsection(self, driver, subsection_link):
+        driver.get(subsection_link)
+        time.sleep(6)
+
+        units = []
+        for unit_el in driver.find_elements_by_xpath('//*[@id="sequence-list"]/li'):
+            sub = unit_el.find_element_by_xpath('.//a')
+
+            if 'seq_video' in sub.get_attribute('class'):
+                # click it and send the page to crawl_unit
+                # units.append( self.crawl_unit() )
+                print sub.get_attribute('innerHTML')
+
+
+
+    def crawl_unit(self, response):
+        '''
+        description = ...
+        videos = []
+        for v in video_elements:
+            add youtube stats to v
+
+            get transcript if possible
+            (if not possible through scrapy (and response.body), use
+            the requests library)
+        '''
+        pass
 
 
     def closed(self, reason):
