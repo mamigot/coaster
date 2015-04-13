@@ -244,6 +244,7 @@ class EdXCourseDownloader(Spider):
 
         return CourseSubsectionItem(
             name = subsection_title,
+            href = subsection_link,
             units = [dict(u) for u in units]
         )
 
