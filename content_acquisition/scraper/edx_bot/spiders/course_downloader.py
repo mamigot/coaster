@@ -33,7 +33,7 @@ class EdXCourseDownloader(Spider):
         # Get courses that haven't been crawled yet and register for them
         ''' CURRENT SOLUTION IS FOR TESTING PURPOSES '''
         ''' self.session.query(Course).filter(Course.crawled_on == None) '''
-        for c in self.session.query(Course).filter(Course.edx_guid == 4421):
+        for c in self.session.query(Course).filter(Course.edx_guid == 5576):
             yield Request(
                 url = c.href,
                 meta = {'course_edx_guid':c.edx_guid},
@@ -182,13 +182,7 @@ class EdXCourseDownloader(Spider):
             log.msg(msg, level=log.INFO)
 
             for ss_title, ss_link in subsections.items():
-                msg = "Crawling subsection '%s' with url=%s" \
-                    % (ss_title, ss_link)
-                log.msg(msg, level=log.INFO)
-
-                print "\t" + ss_title
-                print "\t\t" + ss_link
-                self.crawl_subsection(driver, ss_link)
+                self.crawl_subsection(driver, ss_title, ss_link)
 
         return None
 
@@ -217,33 +211,38 @@ class EdXCourseDownloader(Spider):
         return sections
 
 
-    def crawl_subsection(self, driver, subsection_link):
+    def crawl_subsection(self, driver, subsection_title, subsection_link):
+        msg = "Crawling subsection '%s' with url=%s" \
+            % (subsection_title, subsection_link)
+        log.msg(msg, level=log.INFO)
+
         driver.get(subsection_link)
         time.sleep(6)
 
-        units = []
         for unit_el in driver.find_elements_by_xpath('//*[@id="sequence-list"]/li'):
             sub = unit_el.find_element_by_xpath('.//a')
 
             if 'seq_video' in sub.get_attribute('class'):
-                # click it and send the page to crawl_unit
-                # units.append( self.crawl_unit() )
-                print sub.get_attribute('innerHTML')
+                source = Selector(text = sub.get_attribute('innerHTML'))
+                unit_title = source.xpath('//p/text()').extract()[0]
+
+                sub.click()
+                time.sleep(2)
+                self.crawl_unit(driver, unit_title)
 
 
+    def crawl_unit(self, driver, unit_title):
+        msg = "Crawling unit '%s'." % (unit_title)
+        log.msg(msg, level=log.INFO)
 
-    def crawl_unit(self, response):
-        '''
-        description = ...
-        videos = []
-        for v in video_elements:
-            add youtube stats to v
+        for module in driver.find_elements_by_xpath('//*[@id="seq_content"]/div/div/div'):
+            module = module.find_element_by_xpath('.//div')
+            data_type = module.get_attribute('data-block-type')
 
-            get transcript if possible
-            (if not possible through scrapy (and response.body), use
-            the requests library)
-        '''
-        pass
+            if data_type == 'html':
+                pass
+            elif data_type == 'video':
+                pass
 
 
     def closed(self, reason):
