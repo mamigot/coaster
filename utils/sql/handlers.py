@@ -26,6 +26,19 @@ def get_or_create_row(session, model, model_field, value):
     return existing if existing else model()
 
 
+def get_row_from_parent(model, model_field_str, value, siblings):
+    '''
+    Returns object of row that matches the given value and is among the list of
+    siblings (which are objects of similar type). If the object is not in the
+    list, a fresh instance is initialized and returned.
+    '''
+    for s in siblings:
+        if getattr(s, model_field_str) == value:
+            return s
+
+    return None
+
+
 def get_or_create_row_from_parent(model, model_field_str, value, siblings):
     '''
     Returns object of row that matches the given value and is among the list of
