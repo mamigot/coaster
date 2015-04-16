@@ -3,7 +3,7 @@ import re
 from scrapy.exceptions import DropItem
 
 from utils.sql import get_session
-from utils.sql.handlers import get_row
+from utils.sql.handlers import get_row, get_or_create_row_from_parent
 
 from utils.sql.models.course import Course
 from utils.sql.models.course_section import CourseSection
@@ -36,20 +36,25 @@ class ContentPlacement(object):
                 % item['edx_guid'])
 
         for item_section in item['sections']:
-            section = get_or_create_row(self.session, CourseSection, \
-                CourseSection.name, item_section['name'])
+            section = get_or_create_row_from_parent(\
+                CourseSection, "name", item_section['name'],\
+                course.sections)
 
             for item_subsection in item_section['subsections']:
-                subsection = get_or_create_row(self.session, CourseSubsection, \
-                    CourseSubsection.name, item_subsection['name'])
+                subsection = get_or_create_row_from_parent(\
+                    CourseSubsection, "name", item_subsection['name'],\
+                    section.subsections)
 
                 for item_unit in item_subsection['units']:
-                    unit = get_or_create_row(self.session, CourseUnit, \
-                        CourseUnit.name, item_unit['name'])
+                    unit = get_or_create_row_from_parent(\
+                        CourseUnit, "name", item_unit['name'],\
+                        subsection.units)
 
                     for item_video in item_unit['videos']:
-                        video = get_or_create_row(self.session, CourseVideo, \
-                            CourseVideo.href, item_video['href'])
+                        video = get_or_create_row_from_parent(\
+                            CourseVideo, "href", item_video['name'],\
+                            unit.videos)
+
 
         self.session.close()
 
