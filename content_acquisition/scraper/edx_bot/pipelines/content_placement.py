@@ -26,6 +26,33 @@ class ContentPlacement(object):
         self.session = get_session()
         course = get_row(self.session, Course, Course.edx_guid, item['edx_guid'])
 
+        if not course:
+            msg = "Cannot store content of course with edx_guid=%s because " \
+                "the course cannot be located in the DB." % (item['edx_guid'])
+            log.msg(msg, level=log.ERROR)
+
+            self.session.close()
+            raise DropItem("Ignoring content from course with edx_guid=%s" \
+                % item['edx_guid'])
+
+        for item_section in item['sections']:
+            section = get_row(self.session, CourseSection, \
+                CourseSection.name, item_section['name'])
+
+            for item_subsection in item_section['subsections']:
+                subsection = get_row(self.session, CourseSubsection, \
+                    CourseSubsection.name, item_subsection['name'])
+
+                for item_unit in item_subsection['units']:
+                    unit = get_row(self.session, CourseUnit, \
+                        CourseUnit.name, item_unit['name'])
+
+                    for item_video in item_unit['videos']:
+                        video = get_row(self.session, CourseVideo, \
+                            CourseVideo.href, item_video['href'])
+
+        self.session.close()
+
 
     def parse_youtube_id(self, youtube_embed_url):
         '''
