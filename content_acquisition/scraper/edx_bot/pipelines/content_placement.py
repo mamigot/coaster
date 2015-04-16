@@ -1,5 +1,6 @@
 import re
 
+from scrapy import log
 from scrapy.exceptions import DropItem
 
 from utils.sql import get_session
@@ -36,56 +37,80 @@ class ContentPlacement(object):
                 % item['edx_guid'])
 
         for item_section in item['sections']:
-            section = get_row_from_parent(\
-                CourseSection, "name", item_section['name'],\
-                course.sections)
-
-            if not section:
-                section = CourseSection(
-                    name=item_section['name'].strip()
-                )
-                course.sections.append(section)
-
-            for item_subsection in item_section['subsections']:
-                subsection = get_row_from_parent(\
-                    CourseSubsection, "name", item_subsection['name'],\
-                    section.subsections)
-
-                if not subsection:
-                    subsection = CourseSubsection(
-                        name=item_subsection['name'].strip(),
-                        href=item_subsection['href'].strip()
-                    )
-                    section.subsections.append(subsection)
-
-                for item_unit in item_subsection['units']:
-                    unit = get_row_from_parent(\
-                        CourseUnit, "name", item_unit['name'],\
-                        subsection.units)
-
-                    if not unit:
-                        unit = CourseUnit(
-                            name=item_unit['name'].strip(),
-                            description=item_unit['description'].strip()
-                        )
-                        subsection.units.append(unit)
-
-                    for item_video in item_unit['videos']:
-                        video = get_row_from_parent(\
-                            CourseVideo, "href", item_video['href'],\
-                            unit.videos)
-
-                        if not video:
-                            video = CourseVideo(
-                                name=item_video['name'].strip(),
-                                href=item_video['href'].strip(),
-                                youtube_id=self.parse_youtube_id(item_video['href'])
-                            )
-                            unit.videos.append(video)
+            self.process_section(item_section, course.sections)
 
         self.session.add(course)
         self.session.commit()
         self.session.close()
+
+
+    def process_section(self, item_section, section_collection):
+        item_section['name'] = item_section['name'].strip()
+
+        section = get_row_from_parent(\
+            CourseSection, "name", item_section['name'],\
+            section_collection)
+
+        if not section:
+            section = CourseSection(
+                name=item_section['name']
+            )
+            section_collection.append(section)
+
+        for item_subsection in item_section['subsections']:
+            self.process_subsection(item_subsection, section.subsections)
+
+
+    def process_subsection(self, item_subsection, subsection_collection):
+        item_subsection['name'] = item_subsection['name'].strip()
+
+        subsection = get_row_from_parent(\
+            CourseSubsection, "name", item_subsection['name'],\
+            subsection_collection)
+
+        if not subsection:
+            subsection = CourseSubsection(
+                name=item_subsection['name'],
+                href=item_subsection['href'].strip()
+            )
+            subsection_collection.append(subsection)
+
+        for item_unit in item_subsection['units']:
+            self.process_unit(item_unit, subsection.units)
+
+
+    def process_unit(self, item_unit, unit_collection):
+        item_unit['name'] = item_unit['name'].strip()
+
+        unit = get_row_from_parent(\
+            CourseUnit, "name", item_unit['name'],\
+            unit_collection)
+
+        if not unit:
+            unit = CourseUnit(
+                name=item_unit['name'],
+                description=item_unit['description'].strip()
+            )
+            unit_collection.append(unit)
+
+        for item_video in item_unit['videos']:
+            self.process_video(item_video, unit.videos)
+
+
+    def process_video(self, item_video, video_collection):
+        item_video['name'] = item_video['name'].strip()
+
+        video = get_row_from_parent(\
+            CourseVideo, "href", item_video['href'],\
+            video_collection)
+
+        if not video:
+            video = CourseVideo(
+                name=item_video['name'],
+                href=item_video['href'].strip(),
+                youtube_id=self.parse_youtube_id(item_video['href'])
+            )
+            video_collection.append(video)
 
 
     def parse_youtube_id(self, youtube_embed_url):
