@@ -277,6 +277,9 @@ class EdXCourseDownloader(Spider):
                     href = youtube_embed_url
                 ))
 
+                msg = "Got video with url='%s'." % (youtube_embed_url)
+                log.msg(msg, level=log.INFO)
+
         return CourseUnitItem(
             name = unit_title,
             description = written_content,
