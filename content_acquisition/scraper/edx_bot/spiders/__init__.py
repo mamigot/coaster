@@ -37,7 +37,7 @@ class EdXLoggerIn(object):
         # Random element within the page... when it loads, we'll be "in"
         WebDriverWait(self.driver, 20).until(
             EC.visibility_of_element_located((By.XPATH,
-                '//*[@id="dashboard-main"]/section[1]/header/h2/span[2]')))
+                '/html/body/div[1]/header/div/ul/li[1]/a/div')))
 
         self.driver.get(self.dashboard_href)
         self.signin_cookies = self.driver.get_cookies()
