@@ -36,19 +36,19 @@ class ContentPlacement(object):
                 % item['edx_guid'])
 
         for item_section in item['sections']:
-            section = get_row(self.session, CourseSection, \
+            section = get_or_create_row(self.session, CourseSection, \
                 CourseSection.name, item_section['name'])
 
             for item_subsection in item_section['subsections']:
-                subsection = get_row(self.session, CourseSubsection, \
+                subsection = get_or_create_row(self.session, CourseSubsection, \
                     CourseSubsection.name, item_subsection['name'])
 
                 for item_unit in item_subsection['units']:
-                    unit = get_row(self.session, CourseUnit, \
+                    unit = get_or_create_row(self.session, CourseUnit, \
                         CourseUnit.name, item_unit['name'])
 
                     for item_video in item_unit['videos']:
-                        video = get_row(self.session, CourseVideo, \
+                        video = get_or_create_row(self.session, CourseVideo, \
                             CourseVideo.href, item_video['href'])
 
         self.session.close()
