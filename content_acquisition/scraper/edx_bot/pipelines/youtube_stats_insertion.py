@@ -1,3 +1,4 @@
+import pytz
 from datetime import datetime
 
 from utils.sql import get_session
@@ -26,7 +27,7 @@ class YouTubeStatsInsertion(object):
         video.yt_favorites = item['yt_favorites']
         video.yt_comments = item['yt_comments']
 
-        video.stats_as_of = datetime.utcnow()
+        video.stats_as_of = datetime.now(pytz.utc)
 
         self.session.add(video)
         self.session.commit()
