@@ -31,6 +31,7 @@ class GeneralCoursewareSpider(Spider):
     def start_requests(self):
         self.session = get_session()
         self.edx_logger = EdXLoggerIn()
+        self.edx_logger.driver.maximize_window()
 
         # Get courses that haven't been crawled yet and register for them
         for c in self.session.query(Course).filter(Course.last_crawled_on == None):
@@ -50,7 +51,6 @@ class GeneralCoursewareSpider(Spider):
         course_homepage_url = response.url
 
         driver = self.edx_logger.driver
-        driver.maximize_window()
         driver.get(course_homepage_url)
         # Space requests out by 2 seconds
         time.sleep(2)
@@ -312,6 +312,7 @@ class GeneralCoursewareSpider(Spider):
         if videos:
             return CourseUnitItem(
                 name = unit_title,
+                href = driver.current_url,
                 description = written_content,
                 videos = [dict(v) for v in videos]
             )

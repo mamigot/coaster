@@ -46,6 +46,7 @@ class CourseSubsectionItem(Item):
 
 class CourseUnitItem(Item):
     name = Field()
+    href = Field()
     description = Field()
     videos = Field()
 

@@ -93,6 +93,7 @@ class GeneralCourseContentInsertion(object):
         if not unit:
             unit = CourseUnit(
                 name=item_unit['name'],
+                href=item_unit['href'].strip(),
                 description=item_unit['description'].strip()
             )
             unit_collection.append(unit)

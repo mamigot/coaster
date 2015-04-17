@@ -17,6 +17,7 @@ class CourseUnit(Base):
     id = Column(Integer, primary_key=True)
     subsection_id = Column(Integer, ForeignKey('course_subsections.id'))
     name = Column(String, nullable=False)
+    href = Column(String)
 
     description = Column(String)
 
