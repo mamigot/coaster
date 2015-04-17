@@ -9,6 +9,10 @@ from utils.sql.models.course_video import CourseVideo
 
 
 class YouTubeDataRetriever(Spider):
+    '''
+    Using the YouTube IDs on the CourseVideo model, queries the YouTube API
+    for relevant stats and sends them off to the pipelines.
+    '''
     name = 'youtube_data_retriever'
     allowed_domains = ['youtube.com', 'googleapis.com']
     session = None
