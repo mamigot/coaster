@@ -7,6 +7,7 @@ from scrapy.exceptions import CloseSpider
 from edx_bot.items import CourseVideoItem
 from edx_bot.spiders.config import YOUTUBE_SERVER_API_KEY as API_KEY
 
+from sqlalchemy import or_
 from utils.sql import get_session
 from utils.sql.models.course_video import CourseVideo
 
@@ -27,9 +28,11 @@ class YouTubeStatsSpider(Spider):
         # http://stackoverflow.com/questions/17868743/doing-datetime-comparisons-in-filter-sqlalchemy
         one_month_ago = datetime.utcnow() - timedelta(weeks=2)
 
-        for c in self.session.query(CourseVideo)\
-            .filter(CourseVideo.stats_as_of == None)\
-            .filter(CourseVideo.stats_as_of < one_month_ago):
+        for c in self.session.query(CourseVideo).filter(
+            or_(
+                CourseVideo.stats_as_of == None,
+                CourseVideo.stats_as_of < one_month_ago
+            )):
 
             yield Request(
                 url = self.get_api_url(c.youtube_id),
