@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from utils.sql import get_session, handlers
+from utils.sql import get_session
 from utils.sql.models.course import Course
 
 from edx_bot.spiders import EdXLoggerIn
@@ -24,16 +24,15 @@ class EdXCourseDownloader(Spider):
     retrives popularity-oriented statistics).
     '''
     name = 'course_downloader'
-    allowed_domains = ['edx.org', 'youtube.com', 'googleapis.com']
+    allowed_domains = ['edx.org', 'youtube.com']
     session = None
 
     def start_requests(self):
         self.session = get_session()
         self.edx_logger = EdXLoggerIn()
+
         # Get courses that haven't been crawled yet and register for them
-        ''' CURRENT SOLUTION IS FOR TESTING PURPOSES '''
-        ''' self.session.query(Course).filter(Course.crawled_on == None) '''
-        for c in self.session.query(Course).filter(Course.edx_guid == 5576):
+        for c in self.session.query(Course).filter(Course.last_crawled_on == None):
             yield Request(
                 url = c.href,
                 meta = {'course_edx_guid':c.edx_guid},
