@@ -6,7 +6,7 @@ from utils.sql.handlers import get_row
 from utils.sql.models.course_video import CourseVideo
 
 
-class YouTubeDataPlacement(object):
+class YouTubeStatsInsertion(object):
     '''
     Places the course in the database, along with the higher
     models that it entails: institution, subjects and instructors.
@@ -14,7 +14,7 @@ class YouTubeDataPlacement(object):
     session = None
 
     def process_item(self, item, spider):
-        if spider.name not in ['youtube_data_retriever']:
+        if spider.name not in ['youtube_stats_spider']:
             return item
 
         self.session = get_session()

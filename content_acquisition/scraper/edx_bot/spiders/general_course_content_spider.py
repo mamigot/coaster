@@ -17,15 +17,16 @@ from edx_bot.items import CourseItem, CourseSectionItem, CourseSubsectionItem, \
     CourseUnitItem, CourseVideoItem
 
 
-class EdXCourseDownloader(Spider):
+class GeneralCoursewareSpider(Spider):
     '''
     Provided a link to a course, it downloads its content (sections,
     subsections, units and videos --for videos, it queries YouTube and
     retrives popularity-oriented statistics).
     '''
-    name = 'course_downloader'
+    name = 'general_course_content_spider'
     allowed_domains = ['edx.org', 'youtube.com']
     session = None
+
 
     def start_requests(self):
         self.session = get_session()
@@ -268,8 +269,6 @@ class EdXCourseDownloader(Spider):
                 name = module.find_element_by_xpath('.//h2').text
                 youtube_embed_url = module.find_element_by_xpath(\
                     './/div/div/article/section/iframe').get_attribute('src')
-
-                #>> TODO: Get video transcripts
 
                 videos.append(CourseVideoItem(
                     name = name,

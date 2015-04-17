@@ -11,12 +11,12 @@ from utils.sql import get_session
 from utils.sql.models.course_video import CourseVideo
 
 
-class YouTubeDataRetriever(Spider):
+class YouTubeStatsSpider(Spider):
     '''
     Using the YouTube IDs on the CourseVideo model, queries the YouTube API
     for relevant stats and sends them off to the pipelines.
     '''
-    name = 'youtube_data_retriever'
+    name = 'youtube_stats_spider'
     allowed_domains = ['youtube.com', 'googleapis.com']
     # http://doc.scrapy.org/en/latest/topics/spider-middleware.html#scrapy.contrib.spidermiddleware.httperror.HttpErrorMiddleware
     handle_httpstatus_list = [403, 404]

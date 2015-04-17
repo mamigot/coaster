@@ -7,7 +7,7 @@ from utils.sql.models.subject import Subject
 from utils.sql.models.course import Course
 
 
-class CoursePlacement(object):
+class CourseListInsertion(object):
     '''
     Places the course in the database, along with the higher
     models that it entails: institution, subjects and instructors.
@@ -15,7 +15,7 @@ class CoursePlacement(object):
     session = None
 
     def process_item(self, item, spider):
-        if spider.name not in ['course_finder']:
+        if spider.name not in ['course_list_spider']:
             return item
 
         self.session = get_session()

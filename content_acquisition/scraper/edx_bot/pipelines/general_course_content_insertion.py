@@ -14,7 +14,7 @@ from utils.sql.models.course_unit import CourseUnit
 from utils.sql.models.course_video import CourseVideo
 
 
-class ContentPlacement(object):
+class GeneralCourseContentInsertion(object):
     '''
     Places the course's content in the database, structured into sections,
     subsections, units and videos.
@@ -22,7 +22,7 @@ class ContentPlacement(object):
     session = None
 
     def process_item(self, item, spider):
-        if spider.name not in ['course_downloader']:
+        if spider.name not in ['general_course_content_spider']:
             return item
 
         self.session = get_session()
