@@ -40,7 +40,7 @@ class ContentPlacement(object):
         for item_section in item['sections']:
             self.process_section(item_section, course.sections)
 
-        course.latest_crawled_on = datetime.utcnow()
+        course.last_crawled_on = datetime.utcnow()
 
         self.session.add(course)
         self.session.commit()
