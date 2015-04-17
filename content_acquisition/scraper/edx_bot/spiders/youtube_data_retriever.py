@@ -1,5 +1,6 @@
 import json
 from scrapy import Spider, Request, log
+from scrapy.exceptions import CloseSpider
 
 from edx_bot.items import CourseVideoItem
 from edx_bot.spiders.config import YOUTUBE_SERVER_API_KEY as API_KEY
@@ -15,6 +16,8 @@ class YouTubeDataRetriever(Spider):
     '''
     name = 'youtube_data_retriever'
     allowed_domains = ['youtube.com', 'googleapis.com']
+    # http://doc.scrapy.org/en/latest/topics/spider-middleware.html#scrapy.contrib.spidermiddleware.httperror.HttpErrorMiddleware
+    handle_httpstatus_list = [403, 404]
     session = None
 
     def start_requests(self):
@@ -33,6 +36,12 @@ class YouTubeDataRetriever(Spider):
 
 
     def parse(self, response):
+        if response.status in self.handle_httpstatus_list:
+            msg = "HTTP %d. Failed to parse url=%s." % (response.status, response.url)
+            msg += "\nMore info: https://developers.google.com/youtube/v3/docs/errors"
+            msg += "\nresponse.body:\n" + response.body
+            raise CloseSpider(msg)
+
         js = json.loads(response.body_as_unicode())
         stats = js['items'][0]['statistics']
 
