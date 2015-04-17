@@ -1,13 +1,5 @@
-import time, json
+import json
 from scrapy import Spider, Request, log
-
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-
-from utils.sql import get_session
-
 from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
 
 
@@ -21,10 +13,8 @@ class EdxCourseFinder(Spider):
     name = 'course_finder'
     allowed_domains = ['edx.org']
     edx_search_url = 'https://www.edx.org/search/api/all'
-    session = None
 
     def start_requests(self):
-        self.session = get_session()
         return [Request(url=self.edx_search_url, callback=self.parse)]
 
 
@@ -62,7 +52,3 @@ class EdxCourseFinder(Spider):
             course['instructors'] = [dict(i) for i in instructors]
 
             yield course
-
-
-    def closed(self, reason):
-        self.session.close()

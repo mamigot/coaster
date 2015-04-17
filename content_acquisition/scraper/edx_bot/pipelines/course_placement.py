@@ -1,5 +1,3 @@
-from scrapy.exceptions import DropItem
-
 from utils.sql import get_session
 from utils.sql.handlers import get_row
 
