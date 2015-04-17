@@ -1,8 +1,14 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Table, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from utils.sql import Base
 from utils.sql.models.course_video import CourseVideo
+
+
+atable_video_unit = Table('atable_video_unit', Base.metadata,
+    Column('unit_id', Integer, ForeignKey('course_units.id')),
+    Column('video_id', Integer, ForeignKey('course_videos.id'))
+)
 
 
 class CourseUnit(Base):
@@ -14,4 +20,4 @@ class CourseUnit(Base):
 
     description = Column(String)
 
-    videos = relationship('CourseVideo', backref='course_units')
+    videos = relationship('CourseVideo', secondary=atable_video_unit)

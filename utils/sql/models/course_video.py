@@ -7,7 +7,6 @@ class CourseVideo(Base):
     __tablename__ = 'course_videos'
 
     id = Column(Integer, primary_key=True)
-    unit_id = Column(Integer, ForeignKey('course_units.id'))
     name = Column(String, nullable=False)
 
     href = Column(String, nullable=False)
