@@ -103,16 +103,20 @@ class GeneralCourseContentInsertion(object):
 
     def process_video(self, item_video, video_collection):
         item_video['name'] = item_video['name'].strip()
+        youtube_id = self.parse_youtube_id(item_video['href'])
 
-        video = get_row_from_parent(\
-            CourseVideo, "href", item_video['href'],\
-            video_collection)
+        video = get_row(self.session, CourseVideo,
+            CourseVideo.youtube_id, youtube_id)
 
         if not video:
             video = CourseVideo(
+                # TODO: as of now, the name of the video will be
+                # determined by the one who inserts first
+                # (name is rarely important --usually non-descriptive--
+                # but still)
                 name=item_video['name'],
                 href=item_video['href'].strip(),
-                youtube_id=self.parse_youtube_id(item_video['href'])
+                youtube_id=youtube_id
             )
             video_collection.append(video)
 
