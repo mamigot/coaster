@@ -2,3 +2,4 @@ Scrapy==0.24.5
 Selenium=2.45.0
 SQLAlchemy==0.9.9
 psycopg2==2.6
+pytz==2015.2
