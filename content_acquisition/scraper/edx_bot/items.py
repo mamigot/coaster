@@ -51,6 +51,8 @@ class CourseUnitItem(Item):
 
 
 class CourseVideoItem(Item):
+    identifier = Field()
+
     name = Field()
     href = Field()
     transcript = Field()
