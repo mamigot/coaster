@@ -182,19 +182,36 @@ class GeneralCoursewareSpider(Spider):
 
             subsection_items = []
             for ss_title, ss_link in subsection_mappings.items():
-                subsection_items.append(
-                    self.crawl_subsection(driver, ss_title, ss_link)
-                )
+                try:
+                    subsection = self.crawl_subsection(driver, ss_title, ss_link)
+                    if subsection:
+                        subsection_items.append(subsection)
+                except:
+                    msg = "Error crawling subsection '%s'." % (section_title)
+                    log.msg(msg, level=log.ERROR)
 
-            section_items.append(CourseSectionItem(
-                name = section_title,
-                subsections = [dict(s) for s in subsection_items]
-            ))
+            if subsection_items:
+                section_items.append(
+                    CourseSectionItem(
+                        name = section_title,
+                        subsections = [dict(s) for s in subsection_items]
+                ))
 
-        return CourseItem(
-            edx_guid = response.meta['course_edx_guid'],
-            sections = [dict(s) for s in section_items]
-        )
+        if section_items:
+            course = CourseItem(
+                edx_guid = response.meta['course_edx_guid'],
+                sections = [dict(s) for s in section_items]
+            )
+
+            msg = "Crawled course with edx_guid='%s'." % (response.meta['course_edx_guid'])
+            log.msg(msg, level=log.DEBUG)
+            print course
+            return course
+
+        else:
+            msg = "Failed to crawl course with edx_guid='%s'." % (response.meta['course_edx_guid'])
+            log.msg(msg, level=log.ERROR)
+            return None
 
 
     def get_section_overviews(self, driver):
@@ -240,13 +257,22 @@ class GeneralCoursewareSpider(Spider):
 
                 sub.click()
                 time.sleep(2)
-                units.append( self.crawl_unit(driver, unit_title) )
+                try:
+                    unit = self.crawl_unit(driver, unit_title)
+                    if unit:
+                        units.append(unit)
+                except:
+                    msg = "Error crawling unit '%s'." % (unit_title)
+                    log.msg(msg, level=log.ERROR)
 
-        return CourseSubsectionItem(
-            name = subsection_title,
-            href = subsection_link,
-            units = [dict(u) for u in units]
-        )
+        if units:
+            return CourseSubsectionItem(
+                name = subsection_title,
+                href = subsection_link,
+                units = [dict(u) for u in units]
+            )
+        else:
+            return None
 
 
     def crawl_unit(self, driver, unit_title):
@@ -266,23 +292,31 @@ class GeneralCoursewareSpider(Spider):
                     written_content += "\n" + p.text
 
             elif data_type == 'video':
-                name = module.find_element_by_xpath('.//h2').text
-                youtube_embed_url = module.find_element_by_xpath(\
-                    './/div/div/article/section/iframe').get_attribute('src')
+                try:
+                    name = module.find_element_by_xpath('.//h2').text
+                    youtube_embed_url = module.find_element_by_xpath(\
+                        './/div/div/article/section/iframe').get_attribute('src')
 
-                videos.append(CourseVideoItem(
-                    name = name,
-                    href = youtube_embed_url
-                ))
+                    videos.append(CourseVideoItem(
+                        name = name,
+                        href = youtube_embed_url
+                    ))
 
-                msg = "Got video with url='%s'." % (youtube_embed_url)
-                log.msg(msg, level=log.INFO)
+                    msg = "Got video with url='%s'." % (youtube_embed_url)
+                    log.msg(msg, level=log.INFO)
 
-        return CourseUnitItem(
-            name = unit_title,
-            description = written_content,
-            videos = [dict(v) for v in videos]
-        )
+                except:
+                    msg = "Error crawling video with url='%s'." % (youtube_embed_url)
+                    log.msg(msg, level=log.ERROR)
+
+        if videos:
+            return CourseUnitItem(
+                name = unit_title,
+                description = written_content,
+                videos = [dict(v) for v in videos]
+            )
+        else:
+            return None
 
 
     def closed(self, reason):
