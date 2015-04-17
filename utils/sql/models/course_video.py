@@ -1,5 +1,5 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
-
+from datetime import datetime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from utils.sql import Base
 
 
@@ -19,3 +19,5 @@ class CourseVideo(Base):
     yt_dislikes = Column(Integer)
     yt_favorites = Column(Integer)
     yt_comments = Column(Integer)
+
+    stats_as_of = Column(DateTime(timezone=True))

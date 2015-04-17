@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+
 from scrapy import Spider, Request, log
 from scrapy.exceptions import CloseSpider
 
@@ -22,8 +24,12 @@ class YouTubeDataRetriever(Spider):
 
     def start_requests(self):
         self.session = get_session()
+        # http://stackoverflow.com/questions/17868743/doing-datetime-comparisons-in-filter-sqlalchemy
+        one_month_ago = datetime.utcnow() - datetime.timedelta(weeks=2)
 
-        for c in self.session.query(CourseVideo).filter(CourseVideo.yt_views == None):
+        for c in self.session.query(CourseVideo)\
+            .filter(CourseVideo.stats_as_of < one_month_ago):
+
             yield Request(
                 url = self.get_api_url(c.youtube_id),
                 meta = {'course_video_id':c.id},

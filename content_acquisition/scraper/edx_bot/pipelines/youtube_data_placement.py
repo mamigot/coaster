@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from utils.sql import get_session
 from utils.sql.handlers import get_row
 
@@ -23,6 +25,8 @@ class YouTubeDataPlacement(object):
         video.yt_dislikes = item['yt_dislikes']
         video.yt_favorites = item['yt_favorites']
         video.yt_comments = item['yt_comments']
+
+        video.stats_as_of = datetime.utcnow()
 
         self.session.add(video)
         self.session.commit()
