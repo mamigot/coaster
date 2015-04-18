@@ -33,16 +33,16 @@ class VideoTranscriptSpider(Spider):
         driver = self.edx_logger.driver
         driver.maximize_window()
 
-        # Select a video without a transcript.
-        # Go to its unit and fetch the transcript (TODO: if a transcript is not
-        # in one unit, it might be in the others).
-        # Return the unit, video pair.
-        for unit, video in self.session.query(CourseUnit, CourseVideo)\
-            .filter(CourseUnit.videos.any(CourseVideo.transcript == None)).all():
+        # TODO: Improve this (should be a single query)
+        for video_id in self.session.query(CourseVideo.id).filter(\
+            CourseVideo.transcript == None):
+
+            unit_href = self.session.query(CourseUnit.href).filter(\
+                CourseUnit.videos.any(CourseVideo.id == video_id)).first()
 
             yield Request(
-                url = unit.href,
-                meta = {'video_id':video.id},
+                url = unit_href[0],
+                meta = {'video_id':video_id[0]},
                 cookies = driver.get_cookies(),
                 callback = self.fetch_transcript
             )
