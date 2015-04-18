@@ -51,7 +51,6 @@ class VideoTranscriptSpider(Spider):
     def fetch_transcript(self, response):
         driver = self.edx_logger.driver
         driver.get(response.url)
-        driver.maximize_window()
         time.sleep(3)
 
         for module in driver.find_elements_by_xpath('//*[@id="seq_content"]/div/div/div'):

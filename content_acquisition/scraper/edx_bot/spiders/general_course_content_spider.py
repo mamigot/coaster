@@ -7,7 +7,7 @@ from scrapy.selector import Selector
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import TimeoutException
 
 from utils.sql import get_session
 from utils.sql.models.course import Course
