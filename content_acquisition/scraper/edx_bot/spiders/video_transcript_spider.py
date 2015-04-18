@@ -1,4 +1,5 @@
 import time
+import requests
 
 from scrapy import Spider, Request, log
 from scrapy.selector import Selector
@@ -41,7 +42,7 @@ class VideoTranscriptSpider(Spider):
 
             yield Request(
                 url = unit.href,
-                meta = {'video_id':video.id, 'unit_id':unit.id},
+                meta = {'video_id':video.id},
                 cookies = driver.get_cookies(),
                 callback = self.fetch_transcript
             )
@@ -59,30 +60,16 @@ class VideoTranscriptSpider(Spider):
 
             if data_type == 'video':
                 try:
-                    # Check if there's a txt transcript (TODO: support .srt format)
-                    transcript_hov = module.find_element_by_class_name('a11y-menu-container')
+                    for download_button in module.find_elements_by_class_name('video-download-button'):
+                        sub_element = download_button.find_element_by_xpath('.//a')
+                        if sub_element.text == 'Download transcript':
+                            transcript_href = sub_element.get_attribute('href')
 
-                    if transcript_hov:
-                        # https://groups.google.com/d/msg/selenium-users/fj1RVXKvAew/4Ye0X8feafcJ
-                        ActionChains(driver).move_to_element(transcript_hov).perform()
-                        time.sleep(2)
+                            msg = "Got transcript url=%s" % (transcript_href)
+                            log.msg(msg, level=log.DEBUG)
 
-                        for format_element in transcript_hov.find_elements_by_class_name('a11y-menu-item-link'):
-                            if format_element.get_attribute('data-value') == 'txt':
-                                # http://stackoverflow.com/a/11956130/2708484
-                                driver.execute_script('javascript:window.scrollBy(250,350)')
-                                driver.execute_script('arguments[0].click();', format_element);
-                                time.sleep(2)
-                                break
-
-                        # Get download URL
-                        for download_button in module.find_elements_by_class_name('video-download-button'):
-                            sub_element = download_button.find_element_by_xpath('//a')
-                            if sub_element.text == 'Download transcript':
-                                transcript_href = sub_element.get_attribute('href')
-
-                                print "\n\nGOT DOWNLOAD URL!\n\n"
-                                print transcript_href
+                            return self.parse_transcript(transcript_href, \
+                                driver.get_cookies(), meta = response.meta)
 
 
                 except NoSuchElementException:
@@ -90,14 +77,21 @@ class VideoTranscriptSpider(Spider):
                         % (response.url)
                     log.msg(msg, level=log.DEBUG)
 
-        # for video in videos
-            # if video.has_transcript
-                # select txt option if possible
-                # get URL to download and cookies
-                # use the requests library to download the content
-
-
         return None
+
+
+    def parse_transcript(self, transcript_href, driver_cookies, meta):
+        cookies = {}
+        for d_cookie in driver_cookies:
+            cookies[d_cookie["name"]] = d_cookie["value"]
+
+        r = requests.get(transcript_href, cookies=cookies)
+        transcript = r.text
+
+        return CourseVideoItem(
+            identifier = meta['video_id'],
+            transcript = transcript.strip()
+        )
 
 
     def closed(self, reason):

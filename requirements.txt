@@ -1,3 +1,4 @@
+requests==2.6.0
 Scrapy==0.24.5
 Selenium=2.45.0
 SQLAlchemy==0.9.9
