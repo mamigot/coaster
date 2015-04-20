@@ -1,5 +1,3 @@
-PROJECT_DIRECTORY_PATH = '/Users/miguelamigot/Software/NYU/WSE/Coaster/'
-
 BOT_NAME = 'edx_bot'
 
 SPIDER_MODULES = ['edx_bot.spiders']
