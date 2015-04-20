@@ -25,7 +25,6 @@ class VideoTranscriptSpider(Spider):
     allowed_domains = ['edx.org', 'youtube.com']
     session = None
 
-
     def start_requests(self):
         self.session = get_session()
         self.edx_logger = EdXLoggerIn()
@@ -69,7 +68,6 @@ class VideoTranscriptSpider(Spider):
 
                             return self.parse_transcript(transcript_href, \
                                 driver.get_cookies(), meta = response.meta)
-
 
                 except NoSuchElementException:
                     msg = "No txt transcript found for video in unit with url=%s" \

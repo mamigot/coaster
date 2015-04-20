@@ -27,7 +27,6 @@ class GeneralCoursewareSpider(Spider):
     allowed_domains = ['edx.org', 'youtube.com']
     session = None
 
-
     def start_requests(self):
         self.session = get_session()
         self.edx_logger = EdXLoggerIn()
