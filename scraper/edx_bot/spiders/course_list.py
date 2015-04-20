@@ -1,16 +1,17 @@
 import json
 from scrapy import Spider, Request, log
-from edx_bot.items import CourseItem, SubjectItem, InstructorItem, InstitutionItem
+from scraper.edx_bot.items import CourseItem, SubjectItem, \
+    InstructorItem, InstitutionItem
 
 
-class CourseOverviewSpider(Spider):
+class CourseList(Spider):
     '''
     Using edX's search API (see 'edx_search_url' below), retrieves a list
     of its courses and sends them to the pipelines.
     This doesn't mean, however, that all of them will be crawled.
     That will be up to subsequent spiders.
     '''
-    name = 'course_list_spider'
+    name = 'course_list'
     allowed_domains = ['edx.org']
     edx_search_url = 'https://www.edx.org/search/api/all'
 

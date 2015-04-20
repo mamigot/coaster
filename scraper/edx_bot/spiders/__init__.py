@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from edx_bot.spiders.config import EDX_LOGIN, EDX_PASSWORD
+from config import EDX_LOGIN, EDX_PASSWORD
 
 
 class EdXLoggerIn(object):

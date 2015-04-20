@@ -4,20 +4,20 @@ from datetime import datetime, timedelta
 from scrapy import Spider, Request, log
 from scrapy.exceptions import CloseSpider
 
-from edx_bot.items import CourseVideoItem
-from edx_bot.spiders.config import YOUTUBE_SERVER_API_KEY as API_KEY
-
 from sqlalchemy import or_
 from utils.sql import get_session
 from utils.sql.models.course_video import CourseVideo
 
+from scraper.edx_bot.items import CourseVideoItem
+from scraper.edx_bot.spiders.config import YOUTUBE_SERVER_API_KEY as API_KEY
 
-class YouTubeStatsSpider(Spider):
+
+class YouTubeStats(Spider):
     '''
     Using the YouTube IDs on the CourseVideo model, queries the YouTube API
     for relevant stats and sends them off to the pipelines.
     '''
-    name = 'youtube_stats_spider'
+    name = 'youtube_stats'
     allowed_domains = ['youtube.com', 'googleapis.com']
     # http://doc.scrapy.org/en/latest/topics/spider-middleware.html#scrapy.contrib.spidermiddleware.httperror.HttpErrorMiddleware
     handle_httpstatus_list = [403, 404]

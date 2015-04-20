@@ -14,14 +14,14 @@ from utils.sql import get_session
 from utils.sql.models.course_unit import CourseUnit
 from utils.sql.models.course_video import CourseVideo
 
-from edx_bot.spiders import EdXLoggerIn
-from edx_bot.spiders.general_course_content_spider import GeneralCoursewareSpider
+from scraper.edx_bot.spiders import EdXLoggerIn
+from scraper.edx_bot.spiders.general_course_content import GeneralCourseContent
 
-from edx_bot.items import CourseVideoItem
+from scraper.edx_bot.items import CourseVideoItem
 
 
-class VideoTranscriptSpider(Spider):
-    name = 'video_transcript_spider'
+class VideoTranscripts(Spider):
+    name = 'video_transcripts'
     allowed_domains = ['edx.org', 'youtube.com']
     session = None
 

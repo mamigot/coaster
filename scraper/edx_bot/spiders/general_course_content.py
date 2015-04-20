@@ -12,18 +12,18 @@ from selenium.common.exceptions import TimeoutException
 from utils.sql import get_session
 from utils.sql.models.course import Course
 
-from edx_bot.spiders import EdXLoggerIn
-from edx_bot.items import CourseItem, CourseSectionItem, CourseSubsectionItem, \
-    CourseUnitItem, CourseVideoItem
+from scraper.edx_bot.spiders import EdXLoggerIn
+from scraper.edx_bot.items import CourseItem, CourseSectionItem, \
+    CourseSubsectionItem, CourseUnitItem, CourseVideoItem
 
 
-class GeneralCoursewareSpider(Spider):
+class GeneralCourseContent(Spider):
     '''
     Provided a link to a course, it downloads its content (sections,
     subsections, units and videos --for videos, it queries YouTube and
     retrives popularity-oriented statistics).
     '''
-    name = 'general_course_content_spider'
+    name = 'general_course_content'
     allowed_domains = ['edx.org', 'youtube.com']
     session = None
 
