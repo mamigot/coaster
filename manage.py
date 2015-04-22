@@ -60,7 +60,6 @@ def scrapy_crawl_spider(spider_name):
 
 
 if __name__ == '__main__':
-
     if sys.argv[1] == 'create_course_tables':
         create_postgres_tables()
 
