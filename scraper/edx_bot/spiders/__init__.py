@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,9 +17,17 @@ class EdXLoggerIn(object):
     dashboard_href = 'https://courses.edx.org/dashboard'
 
     def __init__(self):
-        self.driver = webdriver.Chrome()
-        self.driver.maximize_window()
+        '''
+        When using boot2docker, use the virtual machine's IP address
+        (found by running `boot2docker ip`). Otherwise, use localhost
+        i.e. 0.0.0.0
+        '''
+        local_ip = '192.168.59.103'
+        self.driver = webdriver.Remote(
+           command_executor='http://' + local_ip + ':4444/wd/hub',
+           desired_capabilities=DesiredCapabilities.CHROME)
 
+        self.driver.maximize_window()
         self.driver.get(self.login_href)
 
         form = WebDriverWait(self.driver, 10).until(
@@ -37,7 +46,7 @@ class EdXLoggerIn(object):
         # Random element within the page... when it loads, we'll be "in"
         WebDriverWait(self.driver, 20).until(
             EC.visibility_of_element_located((By.XPATH,
-                '/html/body/div[1]/header/div/ul/li[1]/a/div')))
+                '//*[@id="my-courses"]')))
 
         self.driver.get(self.dashboard_href)
         self.signin_cookies = self.driver.get_cookies()
