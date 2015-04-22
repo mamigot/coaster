@@ -64,7 +64,7 @@ class VideoTranscripts(Spider):
                             transcript_href = sub_element.get_attribute('href')
 
                             msg = "Got transcript url=%s" % (transcript_href)
-                            log.msg(msg, level=log.DEBUG)
+                            log.msg(msg, level=log.INFO)
 
                             return self.parse_transcript(transcript_href, \
                                 driver.get_cookies(), meta = response.meta)
@@ -72,7 +72,7 @@ class VideoTranscripts(Spider):
                 except NoSuchElementException:
                     msg = "No txt transcript found for video in unit with url=%s" \
                         % (response.url)
-                    log.msg(msg, level=log.DEBUG)
+                    log.msg(msg, level=log.INFO)
 
         return None
 
