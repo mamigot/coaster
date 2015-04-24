@@ -1,8 +1,8 @@
 from sqlalchemy import Table, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from utils.sql import Base
-from utils.sql.models.course_video import CourseVideo
+from utils.sql.main import Base
+from course_video import CourseVideo
 
 
 atable_video_unit = Table('atable_video_unit', Base.metadata,

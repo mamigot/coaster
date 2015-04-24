@@ -1,8 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from utils.sql import Base
-from utils.sql.models.course_unit import CourseUnit
+from utils.sql.main import Base
+from course_unit import CourseUnit
 
 
 class CourseSubsection(Base):

@@ -7,3 +7,5 @@ ADD requirements.txt /code/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 ADD . /code/
+
+CMD ["python", "manage.py", "create_course_tables"]

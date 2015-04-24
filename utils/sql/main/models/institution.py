@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from utils.sql import Base
-from utils.sql.models.course import Course
+from utils.sql.main import Base
+from course import Course
 
 
 class Institution(Base):

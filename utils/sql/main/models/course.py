@@ -3,10 +3,10 @@ from datetime import datetime
 from sqlalchemy import Table, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from utils.sql import Base
-from utils.sql.models.subject import Subject
-from utils.sql.models.instructor import Instructor
-from utils.sql.models.course_section import CourseSection
+from utils.sql.main import Base
+from subject import Subject
+from instructor import Instructor
+from course_section import CourseSection
 
 
 # http://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html#many-to-many

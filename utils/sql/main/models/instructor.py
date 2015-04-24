@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String
-from utils.sql import Base
+from utils.sql.main import Base
 
 
-class Subject(Base):
-    __tablename__ = 'subjects'
+class Instructor(Base):
+    __tablename__ = 'instructors'
 
     id = Column(Integer, primary_key=True)
+    edx_nid = Column(Integer)
     name = Column(String, nullable=False)

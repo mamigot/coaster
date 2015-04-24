@@ -1,6 +1,21 @@
 import sys
 
 '''
+Creates course content tables on Postgres
+'''
+def create_course_tables():
+    from utils.sql.main import Base, db_connect
+
+    from utils.sql.main.models import institution, instructor, subject, \
+        course, course_section, course_subsection, course_unit, course_video
+
+    engine = db_connect()
+    # MetaData issues CREATE TABLE statements to the database
+    # for all tables that don't yet exist
+    Base.metadata.create_all(engine)
+
+
+'''
 Crawl Scrapy spider
 
 http://doc.scrapy.org/en/latest/topics/practices.html#run-scrapy-from-a-script
@@ -44,7 +59,10 @@ def scrapy_crawl_spider(spider_name):
 
 
 if __name__ == '__main__':
-    if sys.argv[1] == 'scrapy':
+    if sys.argv[1] == 'create_course_tables':
+        create_course_tables()
+
+    elif sys.argv[1] == 'scrapy':
         if sys.argv[2] == 'crawl':
             if sys.argv[3] in ['course_list', 'general_course_content', \
                 'video_transcripts', 'youtube_stats']:

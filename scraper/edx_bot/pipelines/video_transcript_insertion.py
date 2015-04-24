@@ -1,7 +1,7 @@
-from utils.sql import get_session
-from utils.sql.handlers import get_row
+from utils.sql.main import get_session
+from utils.sql.main.handlers import get_row
 
-from utils.sql.models.course_video import CourseVideo
+from utils.sql.main.models.course_video import CourseVideo
 
 
 class VideoTranscriptInsertion(object):

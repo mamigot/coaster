@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
-from utils.sql import Base
+from utils.sql.main import Base
 
 
 class CourseVideo(Base):
