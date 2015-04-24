@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
 
-from utils.sql.config import DB_ACCESS
+from config import DB_ACCESS
 
 
 # http://docs.sqlalchemy.org/en/rel_0_9/orm/tutorial.html#declare-a-mapping

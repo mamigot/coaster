@@ -4,7 +4,19 @@ main:
     - .:/code
   environment:
     - DEBUG=true
-    
+
+
+postgresdb:
+  extends:
+    file: docker-compose.yml
+    service: main
+  build: utils/sql/
+  ports:
+    - "5432"
+  environment:
+    - DEBUG=true
+
+
 chromedriver:
   image: selenium/standalone-chrome
   ports:
@@ -12,12 +24,14 @@ chromedriver:
   environment:
     - DEBUG=true
 
+
 scraper:
-  command: python manage.py scrapy crawl general_course_content
+  command: python scraper/manage.py scrapy crawl general_course_content
   extends:
     file: docker-compose.yml
     service: main
   links:
     - chromedriver
+    - postgresdb
   environment:
     - DEBUG=true
