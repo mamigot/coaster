@@ -18,12 +18,27 @@ sudo apt-get install libpq-dev
 
 
 # -----------------------------------------------------------------------------#
+sudo apt-get install build-essential libncursesw5-dev libreadline-gplv2-dev
+sudo apt-get install libssl-dev libgdbm-dev libc6-dev libsqlite3-dev tk-dev
+sudo apt-get build-dep python2.7
+
+wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz
+tar -xvzf Python-2.7.9.tgz
+cd Python-2.7.9/
+
+./configure
+make
+make altinstall
+# -----------------------------------------------------------------------------#
+
+
+# -----------------------------------------------------------------------------#
 sudo pip install virtualenvwrapper
 # Add the virtualenvwrapper commands to the env. variables i.e.
 # "source /usr/local/bin/virtualenvwrapper.sh" to "sudo nano ~/.bashrc"
 source ~/.bashrc
 
-# Make the virtualenv
+# Make the virtualenv (specify the python version using "-p" if needed)
 # mkvirtualenv --no-site-packages env-coaster
 
 # Run the virtualenv
@@ -55,6 +70,9 @@ psql edx_courseware
 
 # Reset user password on Postgres ("postgres" is the default user):
 # http://stackoverflow.com/questions/14588212/resetting-password-of-postgresql-on-ubuntu
+
+# Show database sizes: \l+
+# Show table sizes: \d+
 
 # Create tables by calling:
 python manage.py create_course_tables
