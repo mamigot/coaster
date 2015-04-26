@@ -8,3 +8,5 @@ Selenium
 numpy==1.9.2
 pyenchant==1.6.6
 nltk==3.0.2
+uwsgi
+flask
