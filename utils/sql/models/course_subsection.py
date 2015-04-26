@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from utils.sql.main import Base
+from utils.sql import Base
 from course_unit import CourseUnit
 
 

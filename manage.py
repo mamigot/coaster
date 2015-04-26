@@ -4,9 +4,9 @@ import sys
 Creates course content tables on Postgres
 '''
 def create_course_tables():
-    from utils.sql.main import Base, db_connect
+    from utils.sql import Base, db_connect
 
-    from utils.sql.main.models import institution, instructor, subject, \
+    from utils.sql.models import institution, instructor, subject, \
         course, course_section, course_subsection, course_unit, course_video
 
     engine = db_connect()

@@ -1,7 +1,7 @@
 from sqlalchemy import Table, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from utils.sql.main import Base
+from utils.sql import Base
 from course_video import CourseVideo
 
 

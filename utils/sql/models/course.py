@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Table, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from utils.sql.main import Base
+from utils.sql import Base
 from subject import Subject
 from instructor import Instructor
 from course_section import CourseSection
