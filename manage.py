@@ -1,4 +1,4 @@
-import sys
+import sys, os
 
 '''
 Creates course content tables on Postgres
@@ -24,6 +24,7 @@ def scrapy_crawl_spider(spider_name):
     from twisted.internet import reactor
     from scrapy.crawler import Crawler
     from scrapy import log, signals
+    from scrapy.settings import Settings
     from scrapy.utils.project import get_project_settings
 
     spider = None
@@ -48,8 +49,17 @@ def scrapy_crawl_spider(spider_name):
             import YouTubeStats
         spider = YouTubeStats()
 
-    settings = get_project_settings()
+    else:
+        print "spider '%s' is not listed" % spider_name
+
+    # Working around bug in Scrapy's source code
+    # http://stackoverflow.com/a/29874137/2708484
+    settings = Settings()
+    os.environ['SCRAPY_SETTINGS_MODULE'] = 'scraper.edx_bot.settings'
+    settings_module_path = os.environ['SCRAPY_SETTINGS_MODULE']
+    settings.setmodule(settings_module_path, priority='project')
     crawler = Crawler(settings)
+
     crawler.signals.connect(reactor.stop, signal=signals.spider_closed)
     crawler.configure()
     crawler.crawl(spider)
@@ -68,3 +78,10 @@ if __name__ == '__main__':
                 'video_transcripts', 'youtube_stats']:
 
                     scrapy_crawl_spider(sys.argv[3])
+            else:
+                print "spider name: '%s' is not listed" % sys.argv[3]
+        else:
+            print "command: '%s' is not listed" % sys.argv[2]
+
+    else:
+        print "'%s' is not supported" % sys.argv[1]
