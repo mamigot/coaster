@@ -44,12 +44,12 @@ source ~/.bashrc
 sudo -i -u postgres
 
 # Within the console (psql), create a database:
-# createdb edx_courseware
+> createdb edx_courseware
 
 # Access an existing database:
-# psql edx_courseware
+psql edx_courseware
 
-# \conninfo example (valid within psql):
+# "\conninfo" example (valid within psql):
 # "You are connected to database "edx_courseware" as user "postgres" via
 # socket in "/var/run/postgresql" at port "5432"."
 
@@ -57,9 +57,23 @@ sudo -i -u postgres
 # http://stackoverflow.com/questions/14588212/resetting-password-of-postgresql-on-ubuntu
 
 # Create tables by calling:
-# python manage.py create_course_tables
+python manage.py create_course_tables
 # -----------------------------------------------------------------------------#
 
+
+# -----------------------------------------------------------------------------#
+docker pull selenium/standalone-chrome
+export HOSTPORT=4444
+export CONTAINERPORT=4444
+docker run -p 127.0.0.1:$HOSTPORT:$CONTAINERPORT --name chromedriver -t -d selenium/standalone-chrome
+
+# List all containers:
+docker ps -a
+# Stop, kill and remove a container:
+docker stop chromedriver
+docker kill chromedriver
+docker rm chromedriver
+# -----------------------------------------------------------------------------#
 
 pip install -r requirements.txt
 
