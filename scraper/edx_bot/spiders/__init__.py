@@ -17,14 +17,8 @@ class EdXLoggerIn(object):
     dashboard_href = 'https://courses.edx.org/dashboard'
 
     def __init__(self):
-        '''
-        When using boot2docker, use the virtual machine's IP address
-        (found by running `boot2docker ip`). Otherwise, use localhost
-        i.e. 0.0.0.0
-        '''
-        local_ip = '192.168.59.103'
         self.driver = webdriver.Remote(
-           command_executor='http://' + local_ip + ':4444/wd/hub',
+           command_executor='http://0.0.0.0:4444/wd/hub',
            desired_capabilities=DesiredCapabilities.CHROME)
 
         self.driver.maximize_window()
