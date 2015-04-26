@@ -5,14 +5,14 @@ from datetime import datetime
 from scrapy import log
 from scrapy.exceptions import DropItem
 
-from utils.sql.main import get_session
-from utils.sql.main.handlers import get_row, get_row_from_parent
+from utils.sql import get_session
+from utils.sql.handlers import get_row, get_row_from_parent
 
-from utils.sql.main.models.course import Course
-from utils.sql.main.models.course_section import CourseSection
-from utils.sql.main.models.course_subsection import CourseSubsection
-from utils.sql.main.models.course_unit import CourseUnit
-from utils.sql.main.models.course_video import CourseVideo
+from utils.sql.models.course import Course
+from utils.sql.models.course_section import CourseSection
+from utils.sql.models.course_subsection import CourseSubsection
+from utils.sql.models.course_unit import CourseUnit
+from utils.sql.models.course_video import CourseVideo
 
 
 class GeneralCourseContentInsertion(object):
@@ -23,7 +23,7 @@ class GeneralCourseContentInsertion(object):
     session = None
 
     def process_item(self, item, spider):
-        if spider.name not in ['general_course_content_spider']:
+        if spider.name not in ['general_course_content']:
             return item
 
         self.session = get_session()

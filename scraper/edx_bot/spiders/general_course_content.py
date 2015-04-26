@@ -9,8 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 
-from utils.sql.main import get_session
-from utils.sql.main.models.course import Course
+from utils.sql import get_session
+from utils.sql.models.course import Course
 
 from scraper.edx_bot.spiders import EdXLoggerIn
 from scraper.edx_bot.items import CourseItem, CourseSectionItem, \

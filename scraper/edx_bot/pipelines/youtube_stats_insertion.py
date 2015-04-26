@@ -1,10 +1,10 @@
 import pytz
 from datetime import datetime
 
-from utils.sql.main import get_session
-from utils.sql.main.handlers import get_row
+from utils.sql import get_session
+from utils.sql.handlers import get_row
 
-from utils.sql.main.models.course_video import CourseVideo
+from utils.sql.models.course_video import CourseVideo
 
 
 class YouTubeStatsInsertion(object):
@@ -15,7 +15,7 @@ class YouTubeStatsInsertion(object):
     session = None
 
     def process_item(self, item, spider):
-        if spider.name not in ['youtube_stats_spider']:
+        if spider.name not in ['youtube_stats']:
             return item
 
         self.session = get_session()

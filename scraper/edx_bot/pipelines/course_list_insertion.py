@@ -1,10 +1,12 @@
 from utils.sql import get_session
 from utils.sql.handlers import get_row
 
-from utils.sql.main.models.institution import Institution
-from utils.sql.main.models.instructor import Instructor
-from utils.sql.main.models.subject import Subject
-from utils.sql.main.models.course import Course
+from utils.sql.models.institution import Institution
+from utils.sql.models.instructor import Instructor
+from utils.sql.models.subject import Subject
+from utils.sql.models.course import Course
+
+from scrapy import log
 
 
 class CourseListInsertion(object):
@@ -15,7 +17,7 @@ class CourseListInsertion(object):
     session = None
 
     def process_item(self, item, spider):
-        if spider.name not in ['course_list_spider']:
+        if spider.name not in ['course_list']:
             return item
 
         self.session = get_session()

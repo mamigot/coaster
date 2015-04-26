@@ -5,8 +5,8 @@ from scrapy import Spider, Request, log
 from scrapy.exceptions import CloseSpider
 
 from sqlalchemy import or_
-from utils.sql.main import get_session
-from utils.sql.main.models.course_video import CourseVideo
+from utils.sql import get_session
+from utils.sql.models.course_video import CourseVideo
 
 from scraper.edx_bot.items import CourseVideoItem
 from scraper.edx_bot.spiders.config import YOUTUBE_SERVER_API_KEY as API_KEY

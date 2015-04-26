@@ -10,9 +10,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
-from utils.sql.main import get_session
-from utils.sql.main.models.course_unit import CourseUnit
-from utils.sql.main.models.course_video import CourseVideo
+from utils.sql import get_session
+from utils.sql.models.course_unit import CourseUnit
+from utils.sql.models.course_video import CourseVideo
 
 from scraper.edx_bot.spiders import EdXLoggerIn
 from scraper.edx_bot.spiders.general_course_content import GeneralCourseContent
