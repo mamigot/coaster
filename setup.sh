@@ -93,6 +93,15 @@ docker kill chromedriver
 docker rm chromedriver
 # -----------------------------------------------------------------------------#
 
+
+# -----------------------------------------------------------------------------#
+# Use the DigitalOcean link for everything except the Redis version
+# https://www.digitalocean.com/community/tutorials/how-to-install-and-use-redis
+# http://redis.io/download
+
+# -----------------------------------------------------------------------------#
+
+
 pip install -r requirements.txt
 
 mkdir /home/mikel/coaster
