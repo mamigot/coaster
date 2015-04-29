@@ -98,7 +98,11 @@ docker rm chromedriver
 # Use the DigitalOcean link for everything except the Redis version
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-use-redis
 # http://redis.io/download
+sudo service redis_6379 start
+sudo service redis_6379 stop
+redis-cli
 
+#(on Mac, start the Redis server by calling "redis-server"... Ctrl+C to exit)
 # -----------------------------------------------------------------------------#
 
 
