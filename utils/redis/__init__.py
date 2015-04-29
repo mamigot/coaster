@@ -3,11 +3,28 @@ import redis
 redis = redis.Redis(host='localhost', port=6379)
 
 
-# sorted set
-ss_video_transcripts = "video_transcripts"
-# hash (for total term counts in video transcripts)
-# e.g. "total_term_counts_video_transcripts"
-# >> total term count by getting the total number of keys in the hash
+'''
+Sorted sets containing the inverted indexes for each term
+ex.:
+    "ii_video_transcripts:quicksort" is the name, the keys
+    are document IDs and the scores are the frequencies of
+    the terms in said documents.
+'''
+inverted_index_sorted_sets = [
+    'ii_video_transcripts',
+]
+
+'''
+Hashes containing the total term counts.
+ex.:
+    "ttc_video_transcripts" is the name of the hash, the
+    keys are the terms present in the video transcripts
+    and the values are the total frequencies of said terms.
+'''
+total_term_counts_hashes = [
+    'ttc_video_transcripts',
+]
+
 
 
 '''
