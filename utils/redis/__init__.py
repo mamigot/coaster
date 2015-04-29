@@ -25,7 +25,14 @@ total_term_counts_hashes = [
     'ttc_video_transcripts',
 ]
 
-
+'''
+Hashes signaling which documents in redis have been fully indexed.
+ex.:
+    "fi_video_transcripts",
+'''
+fully_indexed_signal_hashes = [
+    'fi_video_transcripts',
+]
 
 '''
 REDIS COMMANDS:

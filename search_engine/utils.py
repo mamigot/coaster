@@ -1,11 +1,18 @@
 import enchant
-from nltk.tokenize import WhitespaceTokenizer
+from nltk.tokenize import RegexpTokenizer, WhitespaceTokenizer
+from nltk.stem.snowball import SnowballStemmer
 
 
 english_dict = enchant.Dict("en_US")
 
 # '2-3 tree' --> ['2', '3', 'tree']
-tokenizer = RegexpTokenizer(r'\w+')
+alphanumeric_tokenizer = RegexpTokenizer(r'\w+')
+
+# WhitespaceTokenizer divides text at whitespace
+whitespace_tokenizer = WhitespaceTokenizer()
+
+snowball_stemmer = SnowballStemmer("english")
+
 
 english_contractions = {
     "ain't"       : ["am not"],
