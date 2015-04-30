@@ -20,6 +20,9 @@ type, as in video_transcripts, etc.:
     - (s) Hashes to signal whether a document has been fully indexed:
         - Once a document is fully indexed, a flag is set on Redis to signal
         that said document does not need to be indexed again.
+
+Relevant collection kinds (collections whose documents are indexed):
+    - video_transcripts
 '''
 
 def fdt_name(collection_kind, term):
@@ -76,8 +79,6 @@ def index_video_transcripts():
                     raise
         else:
             print "Already considered. Skipping video transcript with id=%d..." % c.id
-
-        return
 
     session.close()
 
