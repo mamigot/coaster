@@ -2,66 +2,11 @@ from utils.sql import get_session
 from utils.sql.models.course_video import CourseVideo
 from utils.redis import redis
 from redis.exceptions import ResponseError
+
+from search_engine import fdt_name, ft_name, wd_name, s_name
 from search_engine.nlp import tokenizer, normalize_token, is_valid_term
 from search_engine.stats import get_weight_of_term_in_document, \
     get_magnitude_of_vector
-
-'''
-Following underlying types of data structure in Redis for each document
-type required to perform the TDxIDF calculations (see below for naming
-conventions):
-
-    - (fdt) Sorted sets to record the frequency of a term t in a document d.
-
-    - (ft)  Hashes to record the number of documents containing a term t.
-
-    - (wd)  Hashes to record the magnitude of the vector of weights of
-            the terms in a document.
-
-    - (s)   Hashes to signal whether a document has been fully indexed:
-
-
-Relevant collection kinds (collections whose documents are indexed):
-    - video_transcripts
-'''
-
-
-def fdt_name(collection_kind, term):
-    '''
-    Returns the name of the fdt structure (see above) for the given
-    collection kind.
-
-    - ex.: "video_transcripts:my_term 4 7"
-        - there are 4 instances of "my_term" in document 7.
-    '''
-    return "fdt:" + collection_kind + ":" + term
-
-
-def ft_name(collection_kind):
-    '''
-    Returns the name of the ft structure (see above) for the given
-    collection kind.
-    '''
-    return "ft:" + collection_kind
-
-
-def wd_name(collection_kind):
-    '''
-    Returns the name of the wd structure (see above) for the given
-    collection kind.
-    '''
-    return "wd:" + collection_kind
-
-
-def s_name(collection_kind):
-    '''
-    Returns the name of the s structure (see above) for the given
-    collection kind.
-
-    Once a document is fully indexed, a flag is set on Redis to signal
-    that said document does not need to be indexed again.
-    '''
-    return "s:" + collection_kind
 
 
 def index_video_transcripts():
@@ -78,16 +23,25 @@ def index_video_transcripts():
             frequencies = determine_frequencies_of_valid_terms(transcript)
             doc_term_weights = []
 
+            count = 0
+
             for term in frequencies.keys():
-                # print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
+                print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
+                # Set the frequency of the term in the document
                 redis.zadd(fdt_name(collection, term), c.id, frequencies[term])
-                redis.hincrby(ft_name(collection), term, 1)
+                # Increment the frequency of the term in the collection
+                redis.hincrby(ft_name(collection), term, frequencies[term])
 
                 w = get_weight_of_term_in_document(frequencies[term])
                 doc_term_weights.append(w)
 
+                count += 1
+                if count == 3:
+                    break
+
             doc_weights_magnitude = get_magnitude_of_vector(doc_term_weights)
-            redis.hmset(wd_name(collection), c.id, doc_weights_magnitude)
+            # Set the magnitude of the vector of the document's term weights
+            redis.hmset(wd_name(collection), {c.id : doc_weights_magnitude})
 
             signal_full_indexing_of_document(s_name(collection), c.id)
             print "Finished. %s terms examined in document with id=%d..." % \
@@ -101,6 +55,8 @@ def index_video_transcripts():
                 if "Background save already in progress" not in e:
                     session.close()
                     raise
+
+            return
         else:
             print "\nAlready considered. Skipping video transcript with id=%d..." % c.id
 
@@ -133,4 +89,4 @@ def document_has_been_fully_indexed(collection_kind, doc_ID):
 
 
 def signal_full_indexing_of_document(collection_kind, doc_ID):
-    redis.hmset(collection_kind, {doc_ID: 1})
+    redis.hmset(collection_kind, {doc_ID : 1})

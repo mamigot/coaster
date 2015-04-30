@@ -1,6 +1,6 @@
 import numpy as np
 from utils.redis import redis
-from search_engine.indexing import fdt_name, ft_name, wd_name
+from search_engine import fdt_name, ft_name, wd_name, s_name
 
 
 def get_frequency_of_term_in_document(collection_kind, term, doc_ID):
@@ -8,14 +8,14 @@ def get_frequency_of_term_in_document(collection_kind, term, doc_ID):
     Gets the frequency of the given term in the given document.
     '''
     collection = fdt_name(collection_kind, term)
-    return redis.zscore(collection, doc_ID)
+    return int(redis.zscore(collection, doc_ID))
 
 
 def get_number_of_documents_containing_term(collection_kind, term):
     '''
     Gets the number of documents containing the given term.
     '''
-    return redis.hmget(ft_name(collection_kind), term)
+    return int(redis.hmget(ft_name(collection_kind), term)[0])
 
 
 def get_number_of_terms_in_collection(collection_kind):
@@ -27,6 +27,13 @@ def get_number_of_terms_in_collection(collection_kind):
         frequencies += int(v)
 
     return frequencies
+
+
+def get_number_of_documents_in_collection(collection_kind):
+    '''
+    Get the total number of documents in the given collection.
+    '''
+    return len(redis.hkeys(wd_name(collection_kind)))
 
 
 def get_magnitude_of_weights_vector(collection_kind, doc_ID):
