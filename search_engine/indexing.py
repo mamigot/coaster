@@ -3,6 +3,8 @@ from utils.sql.models.course_video import CourseVideo
 from utils.redis import redis
 from redis.exceptions import ResponseError
 from search_engine.nlp import tokenizer, normalize_token, is_valid_term
+from search_engine.stats import get_weight_of_term_in_document, \
+    get_magnitude_of_vector
 
 '''
 Following underlying types of data structure in Redis for each document
@@ -74,16 +76,22 @@ def index_video_transcripts():
 
             transcript = c.transcript.lower()
             frequencies = determine_frequencies_of_valid_terms(transcript)
+            doc_term_weights = []
 
             for term in frequencies.keys():
                 # print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
                 redis.zadd(fdt_name(collection, term), c.id, frequencies[term])
                 redis.hincrby(ft_name(collection), term, 1)
 
+                w = get_weight_of_term_in_document(frequencies[term])
+                doc_term_weights.append(w)
+
+            doc_weights_magnitude = get_magnitude_of_vector(doc_term_weights)
+            redis.hmset(wd_name(collection), c.id, doc_weights_magnitude)
+
             signal_full_indexing_of_document(s_name(collection), c.id)
             print "Finished. %s terms examined in document with id=%d..." % \
                 (len(frequencies.keys()), c.id)
-
             try:
                 # Blocking operation to ensure that the data is written to disk.
                 # If we try to save while Redis is already saving, then ignore.
@@ -126,29 +134,3 @@ def document_has_been_fully_indexed(collection_kind, doc_ID):
 
 def signal_full_indexing_of_document(collection_kind, doc_ID):
     redis.hmset(collection_kind, {doc_ID: 1})
-
-
-def get_frequency_of_term_in_document(collection_kind, term, doc_ID):
-    '''
-    Gets the frequency of the given term in the given document.
-    '''
-    collection = fdt_name(collection_kind, term)
-    return redis.zscore(collection, doc_ID)
-
-
-def get_number_of_documents_containing_term(collection_kind, term):
-    '''
-    Gets the number of documents containing the given term.
-    '''
-    return redis.hmget(ft_name(collection_kind), term)
-
-
-def get_number_of_terms_in_collection(collection_kind):
-    '''
-    Get the total number of terms in the given collection.
-    '''
-    frequencies = 0
-    for v in redis.hvals(ft_name(collection_kind)):
-        frequencies += int(v)
-
-    return frequencies
