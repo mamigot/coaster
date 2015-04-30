@@ -1,11 +1,9 @@
 from utils.sql import get_session
 from utils.sql.models.course_video import CourseVideo
 from utils.redis import redis
+from redis.exceptions import ResponseError
 
-import re
-import requests
-from search_engine.nlp import english_dict, english_contractions, \
-    tokenizer, stemmer
+from search_engine.nlp import tokenizer, normalize_token, is_valid_term
 
 
 def index_video_transcripts():
@@ -20,7 +18,7 @@ def index_video_transcripts():
             frequencies = get_frequencies_of_valid_terms(transcript)
 
             for term in frequencies.keys():
-                print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
+                # print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
                 redis.zadd("ii_video_transcripts:%s" % term, c.id, frequencies[term])
                 redis.hincrby("ttc_video_transcripts", term, frequencies[term])
 
@@ -30,8 +28,14 @@ def index_video_transcripts():
         else:
             print "Already considered. Skipping video transcript with id=%d..." % c.id
 
-        # Blocking operation to ensure that the data is written to disk
-        redis.save()
+        # Blocking operation to ensure that the data is written to disk.
+        # If we try to save while Redis is already saving, then ignore.
+        try:
+            redis.save()
+        except ResponseError, e:
+            if e != "Background save already in progress":
+                session.close()
+                raise
 
     session.close()
 
@@ -49,32 +53,3 @@ def get_frequencies_of_valid_terms(text):
                 frequencies[token] = 1
 
     return frequencies
-
-
-def normalize_token(token):
-    token = stemmer.stem(token)
-    return remove_needless_punctuation(token).strip()
-
-
-def remove_needless_punctuation(text):
-    '''
-    Remove punctuation that indicates pauses, as well
-    as parentheses, brackets, etc.
-    '''
-    return re.sub(ur"[,.;:\[\]\(\)\{\}]+", '', text)
-
-
-def is_valid_term(term):
-    return in_english_dictionary(term) or in_wikipedia(term)
-
-
-def in_english_dictionary(term):
-    return english_dict.check(term)
-
-
-def in_wikipedia(term):
-    url = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s" \
-        % term
-
-    r = requests.get(url).json()
-    return '-1' not in r['query']['pages'].keys()

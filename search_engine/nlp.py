@@ -1,16 +1,14 @@
+import re
 import enchant
+import requests
 from nltk.tokenize import RegexpTokenizer, WhitespaceTokenizer
 from nltk.stem.snowball import SnowballStemmer
 
 
-english_dict = enchant.Dict("en_US")
-
-# WhitespaceTokenizer divides text at whitespace
 tokenizer = WhitespaceTokenizer()
-
 stemmer = SnowballStemmer("english")
 
-
+english_dict = enchant.Dict("en_US")
 english_contractions = {
     "ain't"       : ["am not"],
     "aren't"      : ["are not"],
@@ -109,3 +107,32 @@ english_contractions = {
     "you're"	  : ["you are"],
     "you've" 	  : ["you have"],
 }
+
+
+def normalize_token(token):
+    token = stemmer.stem(token)
+    return remove_needless_punctuation(token).strip()
+
+
+def remove_needless_punctuation(text):
+    '''
+    Remove punctuation that indicates pauses, as well
+    as parentheses, brackets, etc.
+    '''
+    return re.sub(ur"[,.;:\[\]\(\)\{\}]+", '', text)
+
+
+def is_valid_term(term):
+    return in_english_dictionary(term) or in_wikipedia(term)
+
+
+def in_english_dictionary(term):
+    return english_dict.check(term)
+
+
+def in_wikipedia(term):
+    url = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s" \
+        % term
+
+    r = requests.get(url).json()
+    return '-1' not in r['query']['pages'].keys()
