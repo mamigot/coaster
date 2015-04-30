@@ -68,6 +68,11 @@ def scrapy_crawl_spider(spider_name):
     reactor.run()
 
 
+def build_inverted_index():
+    from search_engine import indexing
+    indexing.index_video_transcripts()
+
+
 if __name__ == '__main__':
     if sys.argv[1] == 'create_course_tables':
         create_course_tables()
@@ -82,6 +87,9 @@ if __name__ == '__main__':
                 print "spider name: '%s' is not listed" % sys.argv[3]
         else:
             print "command: '%s' is not listed" % sys.argv[2]
+
+    elif sys.argv[1] == 'build_inverted_index':
+        build_inverted_index()
 
     else:
         print "'%s' is not supported" % sys.argv[1]
