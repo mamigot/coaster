@@ -6,6 +6,37 @@ from redis.exceptions import ResponseError
 from search_engine.nlp import tokenizer, normalize_token, is_valid_term
 
 
+def get_term_frequency_in_document(collection_kind, term, doc_ID):
+    '''
+    Gets the frequency of the given term in the given document.
+
+    ex.: "zscore ii_video_transcripts:hotel 7" for the following values:
+        collection_kind = "ii_video_transcripts"
+        doc_ID = 7
+        term = "hotel"
+    '''
+    collection = "%s:%s" % (collection_kind, term)
+    return redis.zscore(collection, doc_ID)
+
+
+def get_number_of_documents_containing_term(collection_kind, term):
+    '''
+    Gets the number of documents containing the given term.
+
+    ex.: "hvals ttc_video_transcripts hotel"
+    '''
+    return redis.hmget(collection_kind, term)
+
+
+def get_number_of_terms_in_collection(collection_kind):
+    '''
+    Get the total number of terms in the given collection.
+
+    ex.: "hvals ttc_video_transcripts"
+    '''
+    return sum([int(v) for v in redis.hvals(collection_kind)])
+
+
 def index_video_transcripts():
     session = get_session()
 
@@ -15,7 +46,7 @@ def index_video_transcripts():
             print "Building inverted index for video transcript with id=%d..." % c.id
 
             transcript = c.transcript.lower()
-            frequencies = get_frequencies_of_valid_terms(transcript)
+            frequencies = determine_frequencies_of_valid_terms(transcript)
 
             for term in frequencies.keys():
                 # print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
@@ -40,7 +71,7 @@ def index_video_transcripts():
     session.close()
 
 
-def get_frequencies_of_valid_terms(text):
+def determine_frequencies_of_valid_terms(text):
     frequencies = {}
     tokens = tokenizer.tokenize(text)
 
