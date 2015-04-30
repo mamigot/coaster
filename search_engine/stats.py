@@ -22,7 +22,7 @@ def get_frequency_of_term_in_document(collection_kind, term, doc_ID):
     return int(redis.zscore(collection, doc_ID))
 
 
-def get_number_of_terms_in_collection(collection_kind):
+def get_number_of_terms(collection_kind):
     '''
     Get the total number of terms in the given collection.
     '''
@@ -33,11 +33,16 @@ def get_number_of_terms_in_collection(collection_kind):
     return frequencies
 
 
-def get_number_of_documents_in_collection(collection_kind):
+def get_number_of_documents(collection_kind):
     '''
     Get the total number of documents in the given collection.
     '''
     return len(redis.hkeys(wd_name(collection_kind)))
+
+
+def get_number_of_documents_containing_term(collection_kind, term):
+    collection = fdt_name(collection_kind, term)
+    return len(redis.zrange(collection, 0, -1))
 
 
 def get_magnitude_of_weights_vector(collection_kind, doc_ID):
@@ -46,6 +51,12 @@ def get_magnitude_of_weights_vector(collection_kind, doc_ID):
 
 def get_weight_of_term_in_document(term_frequency_in_document):
     return 1 + np.log(term_frequency_in_document)
+
+
+def get_weight_of_term_in_query(collection_kind, term):
+    N = get_number_of_terms(collection_kind)
+    ft = get_number_of_documents_containing_term(collection_kind, term)
+    return np.log(1 + N/ft)
 
 
 def get_magnitude_of_vector(vector):
