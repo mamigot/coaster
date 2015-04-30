@@ -3,6 +3,17 @@ from utils.redis import redis
 from search_engine import fdt_name, ft_name, wd_name, s_name
 
 
+def get_document_frequency_pairs_for_term(collection_kind, term):
+    '''
+    Returns a list of document-frequency pairs (first element of
+    a pair contains the document ID and the second contains the
+    frequency of the term in said document).
+    '''
+    collection = fdt_name(collection_kind, term)
+    pairs = redis.zrange(collection, 0, -1, desc=True, withscores=True)
+    return [(int(doc_ID), int(freq)) for (doc_ID, freq) in p]
+
+
 def get_frequency_of_term_in_document(collection_kind, term, doc_ID):
     '''
     Gets the frequency of the given term in the given document.
