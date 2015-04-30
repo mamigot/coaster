@@ -52,21 +52,24 @@ def s_name(collection_kind):
 def index_video_transcripts():
     session = get_session()
     collection = "video_transcripts"
+    print "Indexing video transcripts..."
 
     for c in session.query(CourseVideo).filter(CourseVideo.transcript != None):
         # Only proceed if the document has not been fully indexed
         if not document_has_been_fully_indexed(s_name(collection), c.id):
-            print "Building inverted index for video transcript with id=%d..." % c.id
+            print "\nBuilding inverted index for document with id=%d..." % c.id
 
             transcript = c.transcript.lower()
             frequencies = determine_frequencies_of_valid_terms(transcript)
 
             for term in frequencies.keys():
-                print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
+                # print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
                 redis.zadd(fdt_name(collection, term), c.id, frequencies[term])
                 redis.hincrby(ft_name(collection), term, 1)
 
             signal_full_indexing_of_document(s_name(collection), c.id)
+            print "Finished. %s terms examined in document with id=%d..." % \
+                (len(frequencies.keys()), c.id)
 
             try:
                 # Blocking operation to ensure that the data is written to disk.
@@ -78,7 +81,7 @@ def index_video_transcripts():
                     session.close()
                     raise
         else:
-            print "Already considered. Skipping video transcript with id=%d..." % c.id
+            print "\nAlready considered. Skipping video transcript with id=%d..." % c.id
 
     session.close()
 
