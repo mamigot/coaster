@@ -11,7 +11,7 @@ def get_document_frequency_pairs_for_term(collection_kind, term):
     '''
     collection = fdt_name(collection_kind, term)
     pairs = redis.zrange(collection, 0, -1, desc=True, withscores=True)
-    return [(int(doc_ID), int(freq)) for (doc_ID, freq) in p]
+    return [(int(doc_ID), int(freq)) for (doc_ID, freq) in pairs]
 
 
 def get_frequency_of_term_in_document(collection_kind, term, doc_ID):

@@ -23,7 +23,7 @@ def index_video_transcripts():
             frequencies = determine_frequencies_of_valid_terms(transcript)
             doc_term_weights = []
 
-            for term in frequencies.keys():
+            for term in frequencies:
                 print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
                 # Set the frequency of the term in the document
                 redis.zadd(fdt_name(collection, term), c.id, frequencies[term])
@@ -63,7 +63,7 @@ def determine_frequencies_of_valid_terms(text):
     for token in tokens:
         token = normalize_token(token)
         if token:
-            if token in frequencies.keys():
+            if token in frequencies:
                 frequencies[token] += 1
             elif is_valid_term(token):
                 frequencies[token] = 1
