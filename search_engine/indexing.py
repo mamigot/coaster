@@ -23,8 +23,6 @@ def index_video_transcripts():
             frequencies = determine_frequencies_of_valid_terms(transcript)
             doc_term_weights = []
 
-            count = 0
-
             for term in frequencies.keys():
                 print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
                 # Set the frequency of the term in the document
@@ -34,10 +32,6 @@ def index_video_transcripts():
 
                 w = get_weight_of_term_in_document(frequencies[term])
                 doc_term_weights.append(w)
-
-                count += 1
-                if count == 3:
-                    break
 
             doc_weights_magnitude = get_magnitude_of_vector(doc_term_weights)
             # Set the magnitude of the vector of the document's term weights
@@ -56,7 +50,6 @@ def index_video_transcripts():
                     session.close()
                     raise
 
-            return
         else:
             print "\nAlready considered. Skipping video transcript with id=%d..." % c.id
 

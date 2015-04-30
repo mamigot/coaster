@@ -11,13 +11,6 @@ def get_frequency_of_term_in_document(collection_kind, term, doc_ID):
     return int(redis.zscore(collection, doc_ID))
 
 
-def get_number_of_documents_containing_term(collection_kind, term):
-    '''
-    Gets the number of documents containing the given term.
-    '''
-    return int(redis.hmget(ft_name(collection_kind), term)[0])
-
-
 def get_number_of_terms_in_collection(collection_kind):
     '''
     Get the total number of terms in the given collection.
@@ -37,7 +30,7 @@ def get_number_of_documents_in_collection(collection_kind):
 
 
 def get_magnitude_of_weights_vector(collection_kind, doc_ID):
-    return redis.hmget(wd_name(collection_kind), doc_ID)
+    return float(redis.hmget(wd_name(collection_kind), doc_ID)[0])
 
 
 def get_weight_of_term_in_document(term_frequency_in_document):
