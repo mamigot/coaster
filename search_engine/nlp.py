@@ -119,7 +119,7 @@ def remove_needless_punctuation(text):
     Remove punctuation that indicates pauses, as well
     as parentheses, brackets, etc.
     '''
-    return re.sub(ur"[,.;:\[\]\(\)\{\}]+", '', text)
+    return re.sub(ur"[,.;:!\?\[\]\(\)\{\}<>]+", '', text)
 
 
 def is_valid_term(term):
