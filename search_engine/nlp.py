@@ -5,13 +5,10 @@ from nltk.stem.snowball import SnowballStemmer
 
 english_dict = enchant.Dict("en_US")
 
-# '2-3 tree' --> ['2', '3', 'tree']
-alphanumeric_tokenizer = RegexpTokenizer(r'\w+')
-
 # WhitespaceTokenizer divides text at whitespace
-whitespace_tokenizer = WhitespaceTokenizer()
+tokenizer = WhitespaceTokenizer()
 
-snowball_stemmer = SnowballStemmer("english")
+stemmer = SnowballStemmer("english")
 
 
 english_contractions = {

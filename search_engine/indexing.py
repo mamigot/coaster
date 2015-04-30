@@ -2,57 +2,66 @@ from utils.sql import get_session
 from utils.sql.models.course_video import CourseVideo
 from utils.redis import redis
 
+import re
 import requests
-from search_engine.utils import english_dict, english_contractions \
-    whitespace_tokenizer, snowball_stemmer
+from search_engine.nlp import english_dict, english_contractions, \
+    tokenizer, stemmer
 
 
 def index_video_transcripts():
-    '''
-    Get sorted set from Redis containing info about video transcripts.
-    Get video transcripts from Postgres.
-    '''
-    '''
-    r_video_transcripts = redis object
-    for video_transcript in SQL_video_transcripts:
-        term_frequencies = get_valid_term_frequencies(video_transcript)
-        for term in term_frequencies.keys:
-            # add to r_video_transcript sorted set
-            # increment appropriate key in video_transcript hash
-        # finished parsing video_transcript... call save() in Redis
-    '''
-    self.session = get_session()
+    session = get_session()
 
-    for c in self.session.query(CourseVideo):
+    for c in session.query(CourseVideo).filter(CourseVideo.transcript != None):
         # Only proceed if the document has not been fully indexed
-        if redis.hmget("fi_video_transcripts", c.id)[0] == 0:
+        if redis.hmget("fi_video_transcripts", c.id)[0] == None:
+            print "Building inverted index for video transcript with id=%d..." % c.id
+
             transcript = c.transcript.lower()
             frequencies = get_frequencies_of_valid_terms(transcript)
 
             for term in frequencies.keys():
-                redis.zadd("ii_video_transcripts:%s" % term, frequencies[term], term)
+                print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
+                redis.zadd("ii_video_transcripts:%s" % term, c.id, frequencies[term])
                 redis.hincrby("ttc_video_transcripts", term, frequencies[term])
 
-            # Signal that the document has been properly indexed
-            redis.hmset("fi_video_transcripts", c.id, 1)
+            # Signal that the document has been fully indexed
+            redis.hmset("fi_video_transcripts", {c.id: 1})
 
-        redis.bgsave()
+        else:
+            print "Already considered. Skipping video transcript with id=%d..." % c.id
 
-    self.session.close()
+        # Blocking operation to ensure that the data is written to disk
+        redis.save()
+
+    session.close()
 
 
 def get_frequencies_of_valid_terms(text):
     frequencies = {}
-    tokens = whitespace_tokenizer.tokenize(text)
+    tokens = tokenizer.tokenize(text)
 
     for token in tokens:
-        token = snowball_stemmer.stem(token)
-        if token in frequencies.keys():
-            frequencies[token] += 1
-        elif is_valid_term(token):
-            frequencies[token] = 1
+        token = normalize_token(token)
+        if token:
+            if token in frequencies.keys():
+                frequencies[token] += 1
+            elif is_valid_term(token):
+                frequencies[token] = 1
 
     return frequencies
+
+
+def normalize_token(token):
+    token = stemmer.stem(token)
+    return remove_needless_punctuation(token).strip()
+
+
+def remove_needless_punctuation(text):
+    '''
+    Remove punctuation that indicates pauses, as well
+    as parentheses, brackets, etc.
+    '''
+    return re.sub(ur"[,.;:\[\]\(\)\{\}]+", '', text)
 
 
 def is_valid_term(term):
