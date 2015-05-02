@@ -140,4 +140,5 @@ def in_wikipedia(term):
         % term
 
     r = requests.get(url).json()
+    if 'query' not in r: return False
     return '-1' not in r['query']['pages'].keys()
