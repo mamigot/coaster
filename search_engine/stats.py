@@ -50,7 +50,10 @@ def get_magnitude_of_weights_vector(collection_kind, doc_ID):
 
 
 def get_weight_of_term_in_document(term_frequency_in_document):
-    return 1 + np.log(term_frequency_in_document)
+    if term_frequency_in_document:
+        return 1 + np.log(term_frequency_in_document)
+    else:
+        return 0
 
 
 def get_weight_of_term_in_query(collection_kind, term):
