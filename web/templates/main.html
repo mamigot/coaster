@@ -21,7 +21,7 @@
       .container .text-muted {
         margin: 20px 0;
       }
-      .result{
+      .content{
         padding: 20px;
       }
     </style>
@@ -44,24 +44,42 @@
       </div>
     </div>
     <div class="container">
-      <div class="result">
-      </div>
+      <div class="content"></div>
     </div>
 
     <script>
       $("#search-button").click(function() {
-
         var query = $('#search-query').val();
 
         if(query){
           var url = '/search/' + $('#search-query').val();
 
           $.post(url, function(data) {
-            $(".result").html( data );
+            var results = JSON.parse(data);
+            var query = results['query'];
+            var numResults = results['count'];
+
+            var meta = ' \
+              <p id="query">Query: <b>' + query + '</b></p> \
+              <p id="num-results"> Number of Results: <b>' + numResults + '</b></p> \
+              <hr>';
+
+            var listing = '';
+            var videoData;
+            for (i = 0; i < results['videos'].length; i++) {
+              listing += formatVideoData(results['videos'][i])
+            }
+
+            $(".content").html(meta + listing);
           });
         }
-
       });
+
+      function formatVideoData(videoData) {
+        // Use the video data object to create an HTML
+        // string assembling all of it
+        return "<p>" + videoData['href'] + "</p>";
+      }
     </script>
   </body>
 </html>
