@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>Coaster Search Engine</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <style>
+      html {
+        position: relative;
+        min-height: 100%;
+      }
+      body {
+        margin-bottom: 60px;
+      }
+      .container {
+        width: auto;
+        max-width: 710px;
+        padding: 0 15px;
+        color: #000033;
+      }
+      .container .text-muted {
+        margin: 20px 0;
+      }
+      .result{
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h2>Coaster Search Engine</h2>
+        <h4>Web Search Engines, NYU 2015</h4>
+        <h5>
+          Miguel Amigot,
+          <a href="mailto:m.amigot@nyu.edu">m.amigot@nyu.edu</a>
+        </h5>
+      </div>
+      <div class="col-md-8">
+        <input type="text" class="form-control" id="search-query" placeholder="Search for educational content...">
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-primary" id="search-button">Search</button>
+      </div>
+    </div>
+    <div class="container">
+      <div class="result">
+      </div>
+    </div>
+
+    <script>
+      $("#search-button").click(function() {
+
+        var query = $('#search-query').val();
+
+        if(query){
+          var url = '/search/' + $('#search-query').val();
+
+          $.post(url, function(data) {
+            $(".result").html( data );
+          });
+        }
+
+      });
+    </script>
+  </body>
+</html>
