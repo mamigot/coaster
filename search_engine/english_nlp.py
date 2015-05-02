@@ -109,7 +109,12 @@ english_contractions = {
 }
 
 
+def tokenize(text):
+    return tokenizer.tokenize(text)
+
+
 def normalize_token(token):
+    token = token.lower()
     token = stemmer.stem(token)
     return remove_needless_punctuation(token).strip()
 
@@ -119,7 +124,7 @@ def remove_needless_punctuation(text):
     Remove punctuation that indicates pauses, as well
     as parentheses, brackets, etc.
     '''
-    return re.sub(ur"[,.;:!\?\[\]\(\)\{\}<>]+", '', text)
+    return re.sub(ur"[,.;:!\?\[\]\(\)\{\}<>\"]+", '', text)
 
 
 def is_valid_term(term):
