@@ -24,6 +24,7 @@ def process_search(raw_query, limit=None):
         session.close()
 
         return json.dumps({
+            "query" : raw_query,
             "count" : len(all_videos_data),
             "videos" : all_videos_data
         })
