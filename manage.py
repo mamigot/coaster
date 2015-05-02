@@ -73,6 +73,11 @@ def build_inverted_index():
     indexing.index_video_transcripts()
 
 
+def test_search_results(raw_query):
+    from search_engine.driver import process_search
+    return process_search(raw_query)
+
+
 if __name__ == '__main__':
     if sys.argv[1] == 'create_course_tables':
         create_course_tables()
@@ -90,6 +95,13 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'build_inverted_index':
         build_inverted_index()
+
+
+    elif sys.argv[1] == 'search_for':
+        if sys.argv[2]:
+            print test_search_results(sys.argv[2])
+        else:
+            print "term: '%s' cannot be searched" % sys.argv[2]
 
     else:
         print "'%s' is not supported" % sys.argv[1]
