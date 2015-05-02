@@ -56,7 +56,10 @@ def get_weight_of_term_in_document(term_frequency_in_document):
 def get_weight_of_term_in_query(collection_kind, term):
     N = get_number_of_terms(collection_kind)
     ft = get_number_of_documents_containing_term(collection_kind, term)
-    return np.log(1 + N/ft)
+    if ft:
+        return np.log(1 + N/ft)
+    else:
+        return 0
 
 
 def get_magnitude_of_vector(vector):
