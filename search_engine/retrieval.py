@@ -6,12 +6,10 @@ from search_engine.stats import get_document_frequency_pairs_for_term, \
 
 '''
 Uses the inverted index to rank the document collection
-with regard to a query and identifies the top matching docs.
-
-Source: http://www.cslu.ogi.edu/~zak/cs506-pslc/invertedindex.pdf
+with regard to a query and identifies the top matching docs
+following the vector model.
 '''
-
-def rank_document_collection(collection_kind, tokenized_query):
+def retrieve_using_vector_model(collection_kind, tokenized_query):
     documents = {}
     for qterm in tokenized_query:
         qterm_weight = get_weight_of_term_in_query(collection_kind, qterm)

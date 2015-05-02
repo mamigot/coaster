@@ -4,7 +4,7 @@ from utils.redis import redis
 from redis.exceptions import ResponseError
 
 from search_engine import fdt_name, ft_name, wd_name, s_name
-from search_engine.nlp import tokenizer, normalize_token, is_valid_term
+from search_engine.english_nlp import tokenize, normalize_token, is_valid_term
 from search_engine.stats import get_weight_of_term_in_document, \
     get_magnitude_of_vector
 
@@ -19,12 +19,11 @@ def index_video_transcripts():
         if not document_has_been_fully_indexed(s_name(collection), c.id):
             print "\nBuilding inverted index for document with id=%d..." % c.id
 
-            transcript = c.transcript.lower()
-            frequencies = determine_frequencies_of_valid_terms(transcript)
+            frequencies = determine_frequencies_of_valid_terms(c.transcript)
             doc_term_weights = []
 
             for term in frequencies:
-                print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
+                # print "indexing: (term, frequency) = (%s, %d)" % (term, frequencies[term])
                 # Set the frequency of the term in the document
                 redis.zadd(fdt_name(collection, term), c.id, frequencies[term])
                 # Increment the frequency of the term in the collection
@@ -43,7 +42,6 @@ def index_video_transcripts():
             try:
                 # Blocking operation to ensure that the data is written to disk.
                 # If we try to save while Redis is already saving, then ignore.
-                redis.bgsave()
                 redis.save()
             except ResponseError, e:
                 if "Background save already in progress" not in e:
@@ -58,7 +56,7 @@ def index_video_transcripts():
 
 def determine_frequencies_of_valid_terms(text):
     frequencies = {}
-    tokens = tokenizer.tokenize(text)
+    tokens = tokenize(text)
 
     for token in tokens:
         token = normalize_token(token)
