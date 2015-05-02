@@ -13,7 +13,7 @@ def hello():
 @app.route('/search/<search_query>', methods=['POST'])
 def query_processor(search_query):
     decoded_query = urllib.unquote(search_query).decode('utf8')
-    return driver.process_search(decoded_query, limit=8)
+    return driver.process_search(decoded_query, limit=50)
 
 
 if __name__ == "__main__":
