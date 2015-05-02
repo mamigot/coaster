@@ -8,7 +8,7 @@ from search_engine.english_nlp import tokenize, normalize_token
 from search_engine.retrieval import retrieve_using_vector_model
 
 
-def process_search(raw_query):
+def process_search(raw_query, limit=None):
     '''
     Merely uses the vector model and the "video_transcripts" collection
     '''
@@ -17,13 +17,16 @@ def process_search(raw_query):
 
     if normalized_tokens:
         collection = "video_transcripts"
-        video_ids = retrieve_using_vector_model(collection, normalized_tokens)
+        video_ids = retrieve_using_vector_model(collection, normalized_tokens, limit)
 
         session = get_session()
         all_videos_data = [assemble_video_data(session, v) for v in video_ids]
         session.close()
 
-        return json.dumps(all_videos_data)
+        return json.dumps({
+            "count" : len(all_videos_data),
+            "videos" : all_videos_data
+        })
     else:
         return "No results found for query = '%s'" % raw_query
 
@@ -35,10 +38,10 @@ def assemble_video_data(session, video_id):
     '''
     video = get_row(session, CourseVideo, CourseVideo.id, video_id)
     video_data = {
-        "href" : video.href,
+        "href" : "https://www.youtube.com/watch?v=" + video.youtube_id,
         #"transcript": video.transcript,
         "youtube_stats": {
-            #"_as_of" : video.stats_as_of,
+            "_as_of" : str(video.stats_as_of),
             "views" : video.yt_views,
             "likes" : video.yt_likes,
             "dislikes" : video.yt_dislikes,

@@ -9,7 +9,7 @@ Uses the inverted index to rank the document collection
 with regard to a query and identifies the top matching docs
 following the vector model.
 '''
-def retrieve_using_vector_model(collection_kind, tokenized_query):
+def retrieve_using_vector_model(collection_kind, tokenized_query, limit=None):
     documents = {}
     for qterm in tokenized_query:
         qterm_weight = get_weight_of_term_in_query(collection_kind, qterm)
@@ -31,10 +31,10 @@ def retrieve_using_vector_model(collection_kind, tokenized_query):
         # (see http://stackoverflow.com/a/2501527/2708484 )
         heappush(ranked_docs, (similarity_score * -1, doc_ID))
 
-    # Retrieve the R highest ranked documents
-    R = 7
+    # Number of retrieved results specified by 'limit'
     most_relevant_doc_IDs = []
-    for i in range(R):
+    limit = limit if limit else len(ranked_docs)
+    for i in range(limit):
         if ranked_docs:
             most_relevant_doc_IDs.append(heappop(ranked_docs)[1])
         else: break
