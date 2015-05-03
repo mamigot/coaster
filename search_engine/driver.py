@@ -3,6 +3,13 @@ import json
 from utils.sql import get_session
 from utils.sql.handlers import get_row
 from utils.sql.models.course_video import CourseVideo
+from utils.sql.models.course_unit import CourseUnit
+from utils.sql.models.course_subsection import CourseSubsection
+from utils.sql.models.course_section import CourseSection
+from utils.sql.models.course import Course
+from utils.sql.models.institution import Institution
+from utils.sql.models.subject import Subject
+
 
 from search_engine.english_nlp import tokenize, normalize_token
 from search_engine.retrieval import retrieve_using_vector_model
@@ -38,9 +45,33 @@ def assemble_video_data(session, video_id):
     data pertaining to it and return it as a dictionary.
     '''
     video = get_row(session, CourseVideo, CourseVideo.id, video_id)
+
+    unit_id = session.query(CourseUnit.id).filter(\
+        CourseUnit.videos.any(CourseVideo.id == video.id)).first()
+
+    subsection_id = session.query(CourseSubsection.id).filter(\
+        CourseSubsection.units.any(CourseUnit.id == unit_id)).first()
+
+    section_id = session.query(CourseSection.id).filter(\
+        CourseSection.subsections.any(CourseSubsection.id == subsection_id)).first()
+
+    course = session.query(Course).filter(\
+        Course.sections.any(CourseSection.id == section_id)).first()
+
+    institutions = session.query(Institution).filter(\
+        Institution.courses.any(Course.id == course.id))
+
+
     video_data = {
         "href" : "https://www.youtube.com/watch?v=" + video.youtube_id,
         #"transcript": video.transcript,
+        "course_details" : [
+            {
+                "name" : course.name,
+                "institutions" : [i.name for i in institutions],
+                "subjects" : [s.name for s in course.subjects],
+            },
+        ],
         "youtube_stats": {
             "_as_of" : str(video.stats_as_of),
             "views" : video.yt_views,
