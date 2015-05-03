@@ -10,3 +10,8 @@ cat /var/log/nginx/error.log
 # List uwsgi processes
 ps ax | grep uwsgi
 # Once their PIDs are known, kill them by typing "kill PID"
+
+
+
+
+clear && sudo service nginx restart && curl http://104.131.110.156/ | grep "<head>" && sudo cat /var/log/nginx/error.log | tail -1

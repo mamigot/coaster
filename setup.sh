@@ -47,10 +47,16 @@ source ~/.bashrc
 
 
 # -----------------------------------------------------------------------------#
-# pip install uwsgi flask
+pip install uwsgi flask
+
+# If we get this message: "!!! no internal routing support, rebuild with pcre support !!!"
+# go to http://stackoverflow.com/questions/21669354/rebuild-uwsgi-with-pcre-support
 
 # Make sure that uWSGI can serve our application
-# uwsgi -s coaster.sock --http 0.0.0.0:8000 --module app --callable app
+uwsgi -s app.sock --http 0.0.0.0:8000 --module app --callable app &
+ps -aux | grep uwsgi
+kill [pid of uwsgi process]
+
 # -----------------------------------------------------------------------------#
 
 
@@ -105,6 +111,8 @@ redis-cli
 #(on Mac, start the Redis server by calling "redis-server"... Ctrl+C to exit)
 # -----------------------------------------------------------------------------#
 
+# Install the following in order to get pyenchant to work
+sudo apt-get install libenchant1c2a
 
 pip install -r requirements.txt
 
