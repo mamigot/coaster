@@ -50,10 +50,10 @@ def assemble_video_data(session, video_id):
         CourseUnit.videos.any(CourseVideo.id == video.id)).first()
 
     subsection_id = session.query(CourseSubsection.id).filter(\
-        CourseSubsection.units.any(CourseUnit.id == unit_id)).first()
+        CourseSubsection.units.any(CourseUnit.id == unit_id))
 
     section_id = session.query(CourseSection.id).filter(\
-        CourseSection.subsections.any(CourseSubsection.id == subsection_id)).first()
+        CourseSection.subsections.any(CourseSubsection.id == subsection_id))
 
     course = session.query(Course).filter(\
         Course.sections.any(CourseSection.id == section_id)).first()
@@ -64,14 +64,10 @@ def assemble_video_data(session, video_id):
 
     video_data = {
         "href" : "https://www.youtube.com/watch?v=" + video.youtube_id,
-        #"transcript": video.transcript,
-        "course_details" : [
-            {
-                "name" : course.name,
-                "institutions" : [i.name for i in institutions],
-                "subjects" : [s.name for s in course.subjects],
-            },
-        ],
+        "course_name" : course.name,
+        "institutions" : [i.name for i in institutions],
+        "subjects" : [s.name for s in course.subjects],
+        "transcript" : video.transcript,
         "youtube_stats": {
             "_as_of" : str(video.stats_as_of),
             "views" : video.yt_views,
@@ -79,6 +75,6 @@ def assemble_video_data(session, video_id):
             "dislikes" : video.yt_dislikes,
             "favorites" : video.yt_favorites,
             "comments" : video.yt_comments,
-        }
+        },
     }
     return video_data

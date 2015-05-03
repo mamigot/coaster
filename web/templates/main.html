@@ -21,7 +21,7 @@
       .container .text-muted {
         margin: 20px 0;
       }
-      .content{
+      #meta-content{
         padding: 20px;
       }
     </style>
@@ -44,7 +44,8 @@
       </div>
     </div>
     <div class="container">
-      <div class="content"></div>
+      <div id="meta-content"></div>
+      <div id="video-content"></div>
     </div>
 
     <script>
@@ -64,22 +65,13 @@
               <p id="num-results"> Number of Results: <b>' + numResults + '</b></p> \
               <hr>';
 
-            var listing = '';
-            var videoData;
-            for (i = 0; i < results['videos'].length; i++) {
-              listing += formatVideoData(results['videos'][i])
-            }
-
-            $(".content").html(meta + listing);
+            $("#meta-content").html(meta);
+            $("#video-content").html(
+              '<pre>' + JSON.stringify(results['videos'], undefined, 2) + '</pre>'
+            )
           });
         }
       });
-
-      function formatVideoData(videoData) {
-        // Use the video data object to create an HTML
-        // string assembling all of it
-        return "<p>" + videoData['href'] + "</p>";
-      }
     </script>
   </body>
 </html>
