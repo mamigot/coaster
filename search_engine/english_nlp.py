@@ -9,6 +9,8 @@ tokenizer = WhitespaceTokenizer()
 stemmer = SnowballStemmer("english")
 
 english_dict = enchant.Dict("en_US")
+# TODO: Use the following dictionary to expand contractions, etc. when
+# indexing and retrieving
 english_contractions = {
     "ain't"       : ["am not"],
     "aren't"      : ["are not"],
