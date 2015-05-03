@@ -3,10 +3,12 @@ import enchant
 import requests
 from nltk.tokenize import RegexpTokenizer, WhitespaceTokenizer
 from nltk.stem.snowball import SnowballStemmer
+from nltk.corpus import stopwords
 
 
 tokenizer = WhitespaceTokenizer()
 stemmer = SnowballStemmer("english")
+stopwords = set(stopwords.words("english"))
 
 english_dict = enchant.Dict("en_US")
 # TODO: Use the following dictionary to expand contractions, etc. when
@@ -127,6 +129,10 @@ def remove_needless_punctuation(text):
     as parentheses, brackets, etc.
     '''
     return re.sub(ur"[,.;:!\?\[\]\(\)\{\}<>\"]+", '', text)
+
+
+def is_stopword(term):
+    return term in stopwords
 
 
 def is_valid_term(term):

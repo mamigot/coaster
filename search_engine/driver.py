@@ -11,7 +11,7 @@ from utils.sql.models.institution import Institution
 from utils.sql.models.subject import Subject
 
 
-from search_engine.english_nlp import tokenize, normalize_token
+from search_engine.english_nlp import tokenize, normalize_token, is_stopword
 from search_engine.retrieval import retrieve_using_vector_model
 
 
@@ -24,7 +24,8 @@ def process_search(raw_query, limit=None):
 
     if normalized_tokens:
         collection = "video_transcripts"
-        video_ids = retrieve_using_vector_model(collection, normalized_tokens, limit)
+        non_stopwords = [t for t in normalized_tokens if not is_stopword(t)]
+        video_ids = retrieve_using_vector_model(collection, non_stopwords, limit)
 
         session = get_session()
         all_videos_data = [assemble_video_data(session, v) for v in video_ids]
