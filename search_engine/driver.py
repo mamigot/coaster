@@ -65,11 +65,12 @@ def assemble_video_data(session, video_id):
     video_data = {
         "href" : "https://www.youtube.com/watch?v=" + video.youtube_id,
         "course_name" : course.name,
+        "course_href" : course.href,
         "institutions" : [i.name for i in institutions],
         "subjects" : [s.name for s in course.subjects],
         "transcript" : video.transcript,
         "youtube_stats": {
-            "_as_of" : str(video.stats_as_of),
+            "as_of" : str(video.stats_as_of),
             "views" : video.yt_views,
             "likes" : video.yt_likes,
             "dislikes" : video.yt_dislikes,
