@@ -54,6 +54,8 @@
 
         if(query){
           var url = '/search/' + $('#search-query').val();
+          $("#search-button").addClass("btn-warning");
+          $("#search-button").html("Loading...");
 
           $.post(url, function(data) {
             var results = JSON.parse(data);
@@ -69,6 +71,9 @@
             $("#video-content").html(
               '<pre>' + JSON.stringify(results['videos'], undefined, 2) + '</pre>'
             )
+
+            $("#search-button").removeClass("btn-warning");
+            $("#search-button").html("Search");
           });
         }
       });
