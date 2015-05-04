@@ -19,7 +19,10 @@ def index_video_transcripts():
         if not document_has_been_fully_indexed(s_name(collection), c.id):
             print "\nBuilding inverted index for document with id=%d..." % c.id
 
-            frequencies = determine_frequencies_of_valid_terms(c.transcript)
+            # Replace e.g. "\nTerm1" with " Term1"
+            # (former would not be indexed)
+            transcript = c.transcript.replace("\n", " ")
+            frequencies = determine_frequencies_of_valid_terms(transcript)
             doc_term_weights = []
 
             for term in frequencies:
