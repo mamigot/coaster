@@ -1,11 +1,11 @@
-# -----------------------------------------------------------------------------#
-# Add a user on Ubuntu with sudo privileges
-# (consequently, the directory "/home/mikel/" will be created)
-adduser mikel
-# On visudo, add "mikel    ALL=(ALL:ALL) ALL" under "root    ALL=(ALL:ALL) ALL"
-visudo
-# -----------------------------------------------------------------------------#
+#
+# Software requirements (OS and Python-level packages + databases)
+# in order to run the Coaster search engine
+#
 
+
+# -----------------------------------------------------------------------------#
+# General packages: required for Python, PostgreSQL and nginx
 # http://askubuntu.com/questions/499714/error-installing-scrapy-in-virtualenv-using-pip
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-14-04
 # http://stackoverflow.com/questions/28253681/you-need-to-install-postgresql-server-dev-x-y-for-building-a-server-side-extensi
@@ -15,9 +15,11 @@ sudo apt-get install libffi-dev libssl-dev libxml2-dev libxslt1-dev
 sudo apt-get install postgresql postgresql-contrib
 sudo apt-get install python-psycopg2
 sudo apt-get install libpq-dev
+# -----------------------------------------------------------------------------#
 
 
 # -----------------------------------------------------------------------------#
+# Install Python-2.7.9 from source
 sudo apt-get install build-essential libncursesw5-dev libreadline-gplv2-dev
 sudo apt-get install libssl-dev libgdbm-dev libc6-dev libsqlite3-dev tk-dev
 sudo apt-get build-dep python2.7
@@ -33,38 +35,36 @@ make altinstall
 
 
 # -----------------------------------------------------------------------------#
+# Set up virtualenvwrapper
+
 sudo pip install virtualenvwrapper
 # Add the virtualenvwrapper commands to the env. variables i.e.
 # "source /usr/local/bin/virtualenvwrapper.sh" to "sudo nano ~/.bashrc"
-source ~/.bashrc
 
 # Make the virtualenv (specify the python version using "-p" if needed)
-# mkvirtualenv --no-site-packages env-coaster
+mkvirtualenv --no-site-packages env-coaster
 
 # Run the virtualenv
-# workon env-coaster
+workon env-coaster
 # -----------------------------------------------------------------------------#
 
 
 # -----------------------------------------------------------------------------#
-pip install uwsgi flask
+# Required Python packages
 
-# If we get this message: "!!! no internal routing support, rebuild with pcre support !!!"
-# go to http://stackoverflow.com/questions/21669354/rebuild-uwsgi-with-pcre-support
+# Install the following in order to get pyenchant to work
+sudo apt-get install libenchant1c2a
 
-# Make sure that uWSGI can serve our application
-uwsgi -s app.sock --http 0.0.0.0:8000 --module app --callable app &
-ps -aux | grep uwsgi
-kill [pid of uwsgi process]
-
+pip install -r requirements.txt
 # -----------------------------------------------------------------------------#
 
 
 # -----------------------------------------------------------------------------#
+# Initialize/Manage PostgreSQL database
 # Log into Postgres user account (will not be able to access psql otherwise)
 sudo -i -u postgres
 
-# Within the console (psql), create a database:
+# Within the console (type "psql" to access it), create a database:
 > createdb edx_courseware
 
 # Access an existing database:
@@ -86,6 +86,7 @@ python manage.py create_course_tables
 
 
 # -----------------------------------------------------------------------------#
+# Run the Selenium server via Docker to execute the crawling
 docker pull selenium/standalone-chrome
 export HOSTPORT=4444
 export CONTAINERPORT=4444
@@ -101,6 +102,8 @@ docker rm chromedriver
 
 
 # -----------------------------------------------------------------------------#
+# Initialize/Manage the Redis server
+
 # Use the DigitalOcean link for everything except the Redis version
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-use-redis
 # http://redis.io/download
@@ -111,10 +114,44 @@ redis-cli
 #(on Mac, start the Redis server by calling "redis-server"... Ctrl+C to exit)
 # -----------------------------------------------------------------------------#
 
-# Install the following in order to get pyenchant to work
-sudo apt-get install libenchant1c2a
 
-pip install -r requirements.txt
+# -----------------------------------------------------------------------------#
+# Install UWSGI and Flask (if not in requirements.txt)
+pip install uwsgi flask
 
-mkdir /home/mikel/coaster
-cd /home/mikel/coaster/
+# If we get this message: "!!! no internal routing support, rebuild with pcre support !!!"
+# go to http://stackoverflow.com/questions/21669354/rebuild-uwsgi-with-pcre-support
+
+# Serve the application (later configure for nginx)
+uwsgi -s app.sock --http 0.0.0.0:8000 --module app --callable app &
+# Since it will be running in the background, use these commands to kill it
+# ps -aux | grep uwsgi
+# kill [pid of uwsgi process]
+# -----------------------------------------------------------------------------#
+
+
+# -----------------------------------------------------------------------------#
+# Bonus/additional commands:
+
+# Add a user on Ubuntu with sudo privileges ("/home/mikel/" will be created)
+adduser mikel
+# On visudo, add "mikel ALL=(ALL:ALL) ALL" under "root ALL=(ALL:ALL) ALL"
+visudo
+
+# monitor memory usage
+sudo apt-get install htop
+htop
+
+# Generate SSH key
+ssh-keygen -R 104.131.110.156
+
+# Sync files across systems
+rsync -aP --update --exclude '*.pyc' Coaster/ root@104.131.110.156:/home/mikel/coaster/
+
+# View nginx's error log
+cat /var/log/nginx/error.log
+
+# Test nginx
+sudo service nginx restart && curl http://104.131.110.156/ | \
+grep "<head>" && sudo cat /var/log/nginx/error.log | tail -1
+# -----------------------------------------------------------------------------#
