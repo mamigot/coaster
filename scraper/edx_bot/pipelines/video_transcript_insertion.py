@@ -1,7 +1,8 @@
 from utils.sql import get_session
 from utils.sql.handlers import get_row
-
 from utils.sql.models.course_video import CourseVideo
+
+from clean_up import Cleaner
 
 
 class VideoTranscriptInsertion(object):
@@ -14,8 +15,12 @@ class VideoTranscriptInsertion(object):
         self.session = get_session()
         video = get_row(self.session, CourseVideo, CourseVideo.id, item['identifier'])
 
-        video.transcript = item['transcript']
+        video.transcript = self.clean_transcript(item['transcript'])
 
         self.session.add(video)
         self.session.commit()
         self.session.close()
+
+
+    def clean_transcript(transcript):
+        return Cleaner.rm_whitespace(transcript)
