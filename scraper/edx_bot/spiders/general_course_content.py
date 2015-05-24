@@ -65,6 +65,7 @@ class GeneralCourseContent(Spider):
                 if self.course_is_in_english(driver):
                     enroll_or_open_button.click()
                     # Allow enough time for edX to process the registration
+                    # (no way to detect this on the front-end)
                     time.sleep(6)
 
                     if driver.current_url != course_homepage_url:
@@ -130,7 +131,6 @@ class GeneralCourseContent(Spider):
                 log.msg(msg, level=log.INFO)
 
                 open_button.click()
-                time.sleep(6)
 
                 courseware_xpath = '//*[@id="content"]/nav/div/ol/li[1]/a'
                 courseware_button = WebDriverWait(driver, 10).until(
@@ -138,7 +138,6 @@ class GeneralCourseContent(Spider):
                         (By.XPATH, courseware_xpath)))
 
                 courseware_button.click()
-                time.sleep(2)
 
                 if driver.current_url != course_homepage_url:
                     msg = "Opened course with url=%s" % (course_homepage_url)
@@ -243,11 +242,13 @@ class GeneralCourseContent(Spider):
         log.msg(msg, level=log.INFO)
 
         driver.get(subsection_link)
-        time.sleep(6)
 
         units = []
+        unit_els = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="sequence-list"]')))
 
-        for unit_el in driver.find_elements_by_xpath('//*[@id="sequence-list"]/li'):
+        for unit_el in unit_els.find_elements_by_xpath('.//li'):
             sub = unit_el.find_element_by_xpath('.//a')
 
             if 'seq_video' in sub.get_attribute('class'):
@@ -255,7 +256,7 @@ class GeneralCourseContent(Spider):
                 unit_title = source.xpath('//p/text()').extract()[0]
 
                 sub.click()
-                time.sleep(2)
+
                 try:
                     unit = self.crawl_unit(driver, unit_title)
                     if unit:
@@ -280,8 +281,11 @@ class GeneralCourseContent(Spider):
 
         videos = []
         written_content = ""
+        sequence_el = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="seq_content"]')))
 
-        for module in driver.find_elements_by_xpath('//*[@id="seq_content"]/div/div/div'):
+        for module in sequence_el.find_elements_by_xpath('.//div/div/div'):
             module = module.find_element_by_xpath('.//div')
             data_type = module.get_attribute('data-block-type')
 
