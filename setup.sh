@@ -112,6 +112,9 @@ sudo service redis_6379 stop
 redis-cli
 
 #(on Mac, start the Redis server by calling "redis-server"... Ctrl+C to exit)
+
+# In the Redis command line...
+>> FLUSHDB # Delete all keys in the DB
 # -----------------------------------------------------------------------------#
 
 
