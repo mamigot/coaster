@@ -1,4 +1,3 @@
-import time
 import requests
 
 from scrapy import Spider, Request, log
@@ -22,7 +21,7 @@ from scraper.edx_bot.items import CourseVideoItem
 
 class VideoTranscripts(Spider):
     name = 'video_transcripts'
-    allowed_domains = ['edx.org', 'youtube.com']
+    allowed_domains = ['edx.org']
     session = None
 
     def start_requests(self):
@@ -32,10 +31,13 @@ class VideoTranscripts(Spider):
         driver = self.edx_logger.driver
         driver.maximize_window()
 
-        # TODO: Improve this (should be a single query)
         for video_id in self.session.query(CourseVideo.id).filter(\
             CourseVideo.transcript == None):
 
+            # Get a unit corresponding to that video. Though there may
+            # be multiple units that host that video, the transcripts
+            # should be similar across all... therefore the first unit
+            # should allow us to get the transcript.
             unit_href = self.session.query(CourseUnit.href).filter(\
                 CourseUnit.videos.any(CourseVideo.id == video_id)).first()
 
@@ -50,10 +52,12 @@ class VideoTranscripts(Spider):
     def fetch_transcript(self, response):
         driver = self.edx_logger.driver
         driver.get(response.url)
-        time.sleep(3)
 
-        for module in driver.find_elements_by_xpath('//*[@id="seq_content"]/div/div/div'):
-            module = module.find_element_by_xpath('.//div')
+        sequence_el = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="seq_content"]')))
+
+        for module in sequence_el.find_elements_by_xpath('.//div/div/div'):
             data_type = module.get_attribute('data-block-type')
 
             if data_type == 'video':
@@ -78,16 +82,12 @@ class VideoTranscripts(Spider):
 
 
     def parse_transcript(self, transcript_href, driver_cookies, meta):
-        cookies = {}
-        for d_cookie in driver_cookies:
-            cookies[d_cookie["name"]] = d_cookie["value"]
-
+        cookies = {d['name']:d['value'] for d in driver_cookies}
         r = requests.get(transcript_href, cookies=cookies)
-        transcript = r.text
 
         return CourseVideoItem(
             identifier = meta['video_id'],
-            transcript = transcript.strip()
+            transcript = r.text
         )
 
 
