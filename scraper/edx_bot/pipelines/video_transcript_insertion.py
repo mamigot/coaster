@@ -22,5 +22,5 @@ class VideoTranscriptInsertion(object):
         self.session.close()
 
 
-    def clean_transcript(transcript):
+    def clean_transcript(self, transcript):
         return Cleaner.rm_whitespace(transcript)
