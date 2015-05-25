@@ -1,12 +1,44 @@
+'''
+The classes in this module contain the functions that are used to get
+the names of the data structures in Redis.
+'''
+
+
 class Scraper(object):
-    pass
+    '''
+    Used to keep track of the different types of documents that are crawled.
+    '''
+
+    class Status(object):
+        IN_PROGRESS = 1
+        FINISHED    = 2
+        DISCARDED   = 3
+
+        @classmethod
+        def discern_status(cls, status_code):
+            try:
+                obj = cls.__dict__
+                for var in dir(cls):
+                    if obj[var] == status_code:
+                        return var.lower()
+
+            except KeyError:
+                return None
+
+    @classmethod
+    def status_name(cls, collection_kind, status_code):
+        '''
+        ex.
+            status_name('video_transcripts', Scraper.Status.IN_PROGRESS)
+            >>> 'crawl_statuses:video_transcripts:in_progress'
+        '''
+        status = cls.Status.discern_status(status_code)
+        return "crawl_statuses:" + collection_kind + ":" + status
 
 
 class SearchEngine(object):
     '''
-    Following underlying types of data structure in Redis for each document
-    type required to perform the TDxIDF calculations (see below for naming
-    conventions):
+    Used to keep track of the TDxIDF calculations for each type of doc:
 
         - (fdt) Sorted sets to record the frequency of a term t in a document d.
 
