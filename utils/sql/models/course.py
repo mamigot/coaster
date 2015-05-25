@@ -37,9 +37,7 @@ class Course(Base):
 
     availability = Column(String)
     start = Column(String)
-    # The timezone is UTC (use datetime.utcnow)
-    last_crawled_on = Column(DateTime(timezone=True))
-
+    
     # A course may have multiple subjects
     subjects = relationship("Subject", secondary=atable_course_subject)
     instructors = relationship("Instructor", secondary=atable_course_instructor)

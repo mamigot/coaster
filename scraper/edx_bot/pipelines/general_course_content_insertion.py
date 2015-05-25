@@ -1,5 +1,4 @@
 import re
-import pytz
 from datetime import datetime
 
 from scrapy import log
@@ -42,8 +41,6 @@ class GeneralCourseContentInsertion(object):
 
         for item_section in item['sections']:
             self.process_section(item_section, course.sections)
-
-        course.last_crawled_on = datetime.now(pytz.utc)
 
         self.session.add(course)
         self.session.commit()
