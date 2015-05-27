@@ -30,7 +30,7 @@ class Status(object):
     # (Subcategory of VISITED)
     FINISHED    = 4
 
-    visited_types = [Status.IN_PROGRESS, Status.DISCARDED, Status.FINISHED]
+    visited_types = [IN_PROGRESS, DISCARDED, FINISHED]
 
     @classmethod
     def classify_status_code(cls, status_code):
@@ -114,8 +114,8 @@ class Tracker(object):
             # Additionally, make sure it's not in Status.UNVISITED (this will
             # likely be redundant, but that doesn't matter).
             if status_code in Status.visited_types:
-                cls.add(collection_kind, doc_ID, status.VISITED)
-                cls.delete(collection_kind, doc_ID, status.UNVISITED)
+                cls.add(collection_kind, doc_ID, Status.VISITED)
+                cls.delete(collection_kind, doc_ID, Status.UNVISITED)
 
 
     @classmethod
