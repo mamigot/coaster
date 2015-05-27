@@ -13,7 +13,7 @@ class VideoTranscriptInsertion(object):
             return item
 
         self.session = get_session()
-        video = get_row(self.session, CourseVideo, CourseVideo.id, item['identifier'])
+        video = get_row(self.session, CourseVideo, CourseVideo.id, item['_id'])
 
         video.transcript = self.clean_transcript(item['transcript'])
 

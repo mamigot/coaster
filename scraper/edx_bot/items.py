@@ -15,6 +15,7 @@ class InstitutionItem(Item):
 
 
 class CourseItem(Item):
+    _id = Field()
     edx_guid = Field()
     edx_code = Field()
 
@@ -52,7 +53,7 @@ class CourseUnitItem(Item):
 
 
 class CourseVideoItem(Item):
-    identifier = Field()
+    _id = Field()
 
     name = Field()
     href = Field()

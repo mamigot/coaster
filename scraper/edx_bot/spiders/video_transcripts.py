@@ -86,7 +86,7 @@ class VideoTranscripts(Spider):
         r = requests.get(transcript_href, cookies=cookies)
 
         return CourseVideoItem(
-            identifier = meta['video_id'],
+            _id = meta['video_id'],
             transcript = r.text
         )
 
