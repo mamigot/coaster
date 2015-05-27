@@ -1,3 +1,5 @@
+from scrapy import log
+
 from utils.sql import get_session
 from utils.sql.handlers import get_row
 
@@ -6,7 +8,7 @@ from utils.sql.models.instructor import Instructor
 from utils.sql.models.subject import Subject
 from utils.sql.models.course import Course
 
-from scrapy import log
+from ..tracker import Status, Tracker
 
 
 class CourseListInsertion(object):
@@ -68,9 +70,19 @@ class CourseListInsertion(object):
             try:
                 self.session.add(institution)
                 self.session.commit()
+                self.set_up_for_further_crawling(course.edx_guid)
             except:
                 self.session.rollback()
                 self.session.close()
                 raise
 
         self.session.close()
+
+
+    def set_up_for_further_crawling(self, edx_guid):
+        '''
+        Retrieve the ID of the newly inserted course and use it to
+        place it in the crawling queue for general_course_content.
+        '''
+        course = get_row(self.session, Course, Course.edx_guid, edx_guid)
+        Tracker.add('general_course_content', course.id, Status.UNVISITED)
