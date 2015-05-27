@@ -8,16 +8,29 @@ class Status(object):
     '''
     # Document is ready to be crawled (hasn't been previously attempted).
     UNVISITED   = 0
+
+    # Document has been previously processed, i.e. it's classified under
+    # one of the statuses below... use this to quickly determine whether
+    # a document has been processed.
+    VISITED     = 1
+
     # Document crawl was attempted --theoretically, this status should only
     # apply while the crawl is taking place. As soon as a known error strikes
     # or the crawl finishes correctly, this should no longer apply.
-    IN_PROGRESS = 1
+    # (Subcategory of VISITED)
+    IN_PROGRESS = 2
+
     # Document was not crawled because it did not fulfill the right criteria
     # (e.g. not in English), was incomplete in terms of content or there
     # was an error while attempting the crawl
-    DISCARDED   = 2
+    # (Subcategory of VISITED)
+    DISCARDED   = 3
+
     # Document was crawled correctly.
-    FINISHED    = 3
+    # (Subcategory of VISITED)
+    FINISHED    = 4
+
+    visited_types = [Status.IN_PROGRESS, Status.DISCARDED, Status.FINISHED]
 
     @classmethod
     def classify_status_code(cls, status_code):
@@ -34,7 +47,8 @@ class Status(object):
 
 class Tracker(object):
 
-    valid_collections = ['general_course_content', 'video_transcripts']
+    valid_collections = ['course_list', 'general_course_content',
+        'video_transcripts']
 
     @classmethod
     def identify_sorted_set(cls, collection_kind, status_code):
@@ -94,6 +108,15 @@ class Tracker(object):
             # elements' timestamps/scores will be updated if needed
             redis.zadd(sorted_set, doc_ID, timestamp)
 
+            # Mark the given document ID as Status.VISITED (unless the original
+            # intent was to mark it as Status.UNVISITED or Status.VISITED
+            # --this condition is necessary in order to stop recursive calls).
+            # Additionally, make sure it's not in Status.UNVISITED (this will
+            # likely be redundant, but that doesn't matter).
+            if status_code in Status.visited_types:
+                cls.add(collection_kind, doc_ID, status.VISITED)
+                cls.delete(collection_kind, doc_ID, status.UNVISITED)
+
 
     @classmethod
     def delete(cls, collection_kind, doc_ID, status_code):
@@ -105,8 +128,29 @@ class Tracker(object):
         if sorted_set:
             redis.zrem(sorted_set, doc_ID)
 
+            # Remove the document from Status.VISITED if it's being removed
+            # from one of the following visited categories and it's not in any
+            # of the other visited categories.
+            if status_code in Status.visited_types:
+                for visited_type in Status.visited_types:
+                    if cls.check(collection_kind, doc_ID, visited_type):
+                        return
+
+                cls.delete(collection_kind, doc_ID, Status.VISITED)
+
 
     @classmethod
-    def update(cls, collection_kind, doc_ID, old_status_code, new_status_code):
-        cls.delete(collection_kind, doc_ID, old_status_code)
+    def update(cls, collection_kind, doc_ID, new_status_code):
+        '''
+        Document with the given doc_ID is reassigned to a new status.
+
+        Looks through the list of status types and removes the document
+        from the data structure with conflicting types.
+        '''
+        # Delete the document from existing structures
+        for visited_type in Status.visited_types:
+            if cls.check(collection_kind, doc_ID, visited_type):
+                cls.delete(collection_kind, doc_ID, visited_type)
+
+        # Add the document to the new structure
         cls.add(collection_kind, doc_ID, new_status_code)
