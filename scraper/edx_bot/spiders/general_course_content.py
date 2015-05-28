@@ -18,6 +18,7 @@ from scraper.edx_bot.items import CourseItem, CourseSectionItem, \
     CourseSubsectionItem, CourseUnitItem, CourseVideoItem
 
 from ..tracker import Status, Tracker
+from .. import exceptions
 
 
 class GeneralCourseContent(Spider):
@@ -36,18 +37,35 @@ class GeneralCourseContent(Spider):
         self.edx_logger.driver.maximize_window()
 
         # Get courses that haven't been crawled yet and crawl their
-        # general content (sections, subsections...). Of course, make
-        # sure that we're registered beforehand.
+        # general content (sections, subsections...).
         for course_ID in Tracker.get(self.name, Status.UNVISITED):
             course = get_row(self.session, Course, Course.id, course_ID)
 
             Tracker.update(self.name, course.id, Status.IN_PROGRESS)
 
-            yield Request(
-                url = course.href,
-                meta = {'course_ID':course.id, 'course_edx_guid':course.edx_guid},
+            yield self.process_course({
+                "_id" : course.id,
+                "edx_guid" : course.edx_guid,
+                "href" : course.href
+            })
+
+
+    def discard_course(self, course_ID):
+        Tracker.update(self.name, course_ID, Status.DISCARDED)
+
+
+    def process_course(self, course_data):
+        try:
+            return Request(
+                url = course_data['href'],
+                meta = {
+                    'course_ID':course_data['_id'],
+                    'course_edx_guid':course_data['edx_guid']
+                },
                 callback = self.register_for_course
             )
+        except:
+            pass
 
 
     def register_for_course(self, response):
@@ -81,25 +99,28 @@ class GeneralCourseContent(Spider):
                         msg = "Enrolled into course with url=%s" % (course_homepage_url)
                         log.msg(msg, level=log.INFO)
                     else:
-                        msg = "Trouble enrolling into course with url=%s. Discarding." % (course_homepage_url)
-                        log.msg(msg, level=log.ERROR)
-                        Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
-                        return None
+                        #msg = "Trouble enrolling into course with url=%s. Discarding." % (course_homepage_url)
+                        #log.msg(msg, level=log.ERROR)
+                        #self.discard_course(response.meta['course_ID'])
+                        #return None
+                        raise exceptions.TroubleEnrollingInCourse(course_homepage_url)
                 else:
-                    msg = "Course with url=%s is not in English. Discarding." % (course_homepage_url)
-                    log.msg(msg, level=log.INFO)
-                    Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
-                    return None
+                    #msg = "Course with url=%s is not in English. Discarding." % (course_homepage_url)
+                    #log.msg(msg, level=log.INFO)
+                    #self.discard_course(response.meta['course_ID'])
+                    #return None
+                    raise exceptions.CourseNotInEnglish(course_homepage_url)
 
             else:
                 msg = "Was already enrolled into course with url=%s" % (course_homepage_url)
                 log.msg(msg, level=log.INFO)
 
         except TimeoutException:
-            msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
-            log.msg(msg, level=log.ERROR)
-            Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
-            return None
+            #msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
+            #log.msg(msg, level=log.ERROR)
+            #self.discard_course(response.meta['course_ID'])
+            #return None
+            raise exceptions.TroubleEnrollingInCourse(course_homepage_url)
 
         return Request(
             url = course_homepage_url,
@@ -156,20 +177,23 @@ class GeneralCourseContent(Spider):
                     log.msg(msg, level=log.INFO)
 
                 else:
-                    msg = "Trouble opening course with url=%s. Discarding." % (course_homepage_url)
-                    log.msg(msg, level=log.ERROR)
-                    raise
+                    #msg = "Trouble opening course with url=%s. Discarding." % (course_homepage_url)
+                    #log.msg(msg, level=log.ERROR)
+                    #raise
+                    raise exceptions.TroubleOpeningCourse(course_homepage_url)
 
             else:
-                msg = "Cannot access course with url=%s. Says: '%s'" % \
-                    (course_homepage_url, open_button.text)
-                log.msg(msg, level=log.INFO)
-                raise
+                #msg = "Cannot access course with url=%s. Says: '%s'" % \
+                #    (course_homepage_url, open_button.text)
+                #log.msg(msg, level=log.INFO)
+                #raise
+                raise exceptions.TroubleOpeningCourse(course_homepage_url)
 
         except TimeoutException:
-            msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
-            log.msg(msg, level=log.ERROR)
-            raise
+            #msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
+            #log.msg(msg, level=log.ERROR)
+            #raise
+            raise exceptions.TroubleOpeningCourse(course_homepage_url)
 
 
     def crawl_course(self, response):
@@ -180,7 +204,7 @@ class GeneralCourseContent(Spider):
         try:
             self.access_course(driver, response.url)
         except:
-            Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
+            self.discard_course(response.meta['course_ID'])
             return None
 
         # Dict mapping section titles to dicts mapping subsection titles to links
@@ -198,8 +222,9 @@ class GeneralCourseContent(Spider):
                     if subsection:
                         subsection_items.append(subsection)
                 except:
-                    msg = "Error crawling subsection '%s'." % (section_title)
-                    log.msg(msg, level=log.ERROR)
+                    #msg = "Error crawling subsection '%s'." % (section_title)
+                    #log.msg(msg, level=log.ERROR)
+                    raise exceptions.TroubleCrawlingSubsection(ss_link)
 
             if subsection_items:
                 section_items.append(
@@ -220,9 +245,11 @@ class GeneralCourseContent(Spider):
             return course
 
         else:
-            msg = "Failed to crawl course with edx_guid='%s'." % (response.meta['course_edx_guid'])
-            log.msg(msg, level=log.ERROR)
-            return None
+            #msg = "Failed to crawl course with edx_guid='%s'." % (response.meta['course_edx_guid'])
+            #log.msg(msg, level=log.ERROR)
+            #return None
+            # response.url is the course's URL
+            raise exceptions.TroubleCrawlingCourse(response.url)
 
 
     def get_section_overviews(self, driver):
@@ -275,8 +302,9 @@ class GeneralCourseContent(Spider):
                     if unit:
                         units.append(unit)
                 except:
-                    msg = "Error crawling unit '%s'." % (unit_title)
-                    log.msg(msg, level=log.ERROR)
+                    #msg = "Error crawling unit '%s'." % (unit_title)
+                    #log.msg(msg, level=log.ERROR)
+                    raise exceptions.TroubleCrawlingUnit(driver.current_url)
 
         if units:
             return CourseSubsectionItem(
@@ -322,8 +350,9 @@ class GeneralCourseContent(Spider):
                     log.msg(msg, level=log.INFO)
 
                 except:
-                    msg = "Error crawling video with url='%s'." % (youtube_embed_url)
-                    log.msg(msg, level=log.ERROR)
+                    #msg = "Error crawling video with url='%s'." % (youtube_embed_url)
+                    #log.msg(msg, level=log.ERROR)
+                    raise exceptions.TroubleCrawlingVideo(driver.youtube_embed_url)
 
         if videos:
             return CourseUnitItem(
