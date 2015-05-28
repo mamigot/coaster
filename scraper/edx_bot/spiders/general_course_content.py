@@ -10,11 +10,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 
 from utils.sql import get_session
+from utils.sql.handlers import get_row
 from utils.sql.models.course import Course
 
 from scraper.edx_bot.spiders import EdXLoggerIn
 from scraper.edx_bot.items import CourseItem, CourseSectionItem, \
     CourseSubsectionItem, CourseUnitItem, CourseVideoItem
+
+from ..tracker import Status, Tracker
 
 
 class GeneralCourseContent(Spider):
@@ -32,11 +35,17 @@ class GeneralCourseContent(Spider):
         self.edx_logger = EdXLoggerIn()
         self.edx_logger.driver.maximize_window()
 
-        # Get courses that haven't been crawled yet and register for them
-        for c in self.session.query(Course).filter(Course.last_crawled_on == None):
+        # Get courses that haven't been crawled yet and crawl their
+        # general content (sections, subsections...). Of course, make
+        # sure that we're registered beforehand.
+        for course_ID in Tracker.get(self.name, Status.UNVISITED):
+            course = get_row(self.session, Course, Course.id, course_ID)
+
+            Tracker.update(self.name, course.id, Status.IN_PROGRESS)
+
             yield Request(
-                url = c.href,
-                meta = {'course_edx_guid':c.edx_guid},
+                url = course.href,
+                meta = {'course_ID':course.id, 'course_edx_guid':course.edx_guid},
                 callback = self.register_for_course
             )
 
@@ -74,10 +83,12 @@ class GeneralCourseContent(Spider):
                     else:
                         msg = "Trouble enrolling into course with url=%s. Discarding." % (course_homepage_url)
                         log.msg(msg, level=log.ERROR)
+                        Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
                         return None
                 else:
                     msg = "Course with url=%s is not in English. Discarding." % (course_homepage_url)
                     log.msg(msg, level=log.INFO)
+                    Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
                     return None
 
             else:
@@ -87,6 +98,7 @@ class GeneralCourseContent(Spider):
         except TimeoutException:
             msg = "TimeoutException for course with url=%s. Discarding." % (course_homepage_url)
             log.msg(msg, level=log.ERROR)
+            Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
             return None
 
         return Request(
@@ -168,6 +180,7 @@ class GeneralCourseContent(Spider):
         try:
             self.access_course(driver, response.url)
         except:
+            Tracker.update(self.name, response.meta['course_ID'], Status.DISCARDED)
             return None
 
         # Dict mapping section titles to dicts mapping subsection titles to links
@@ -203,7 +216,7 @@ class GeneralCourseContent(Spider):
 
             msg = "Crawled course with edx_guid='%s'." % (response.meta['course_edx_guid'])
             log.msg(msg, level=log.DEBUG)
-            print course
+            Tracker.update(self.name, response.meta['course_ID'], Status.FINISHED)
             return course
 
         else:
