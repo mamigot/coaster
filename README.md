@@ -6,3 +6,5 @@ Distributed crawler combining [Scrapy's architecture](http://doc.scrapy.org/en/1
 All courses' publicly accessible data (sections, subsections, units as well as videos' links and transcripts) is categorized and stored on a complex relational database built with Postgres.
 
 Calculations and cache-like structures required for the search engine are stored using Redis.
+
+Simple web interface made with Flask and jQuery.
